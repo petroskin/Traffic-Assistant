@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Get the latest map of North Macedonia with all map data included
+updatemap() 
+{
+        rm -f ./data/macedonia-latest.osm
+        wget "https://download.geofabrik.de/europe/macedonia-latest.osm.pbf" -P ./data/
+        osmconvert ./data/macedonia-latest.osm.pbf >./data/macedonia-latest.osm
+        rm -f ./data/macedonia-latest.osm.pbf
+}
+
+# Filter out the road nodes only from a map in data directory and store them in a .csv file
+# Initial pipe and filtering architecture
+updatenodes() 
+{
+	rm -f ./data/nodes.csv
+	osmfilter ./data/macedonia-latest.osm --keep="highway=motorway highway=trunk highway=primary highway=secondary highway=tertiary highway=unclassified highway=residential highway=motorway_link highway=trunk_link highway=primary_link highway=secondary_link highway=tertiary_link" | osmconvert - --all-to-nodes --csv="@id @lon @lat name" --csv-headline --csv-separator="," -o="./data/nodes.csv"
+}
+
+printhelp()
+{
+        echo "Use --update-map to download the latest map of North Macedonia";
+        echo "Use --update-nodes to store the path nodes to nodes.csv file";
+        echo "Use --update-all to download the latest map and store the nodes to a .csv file";
+}
+
+if [ ! -d "./data" ]
+then
+	mkdir data
+fi
+if [ "$#" -gt 1 ]
+then
+	echo "Please provide a single argument (use --help)";
+elif [ "$1" = "--help" ]
+then
+	printhelp
+elif [ "$1" = "--update-map" ]
+then
+	updatemap
+elif [ "$1" = "--update-nodes" ]
+then
+	updatenodes
+elif [ "$1" = "--update-all" ]
+then
+	updatemap
+	updatenodes
+else
+	printhelp
+fi
