@@ -6,7 +6,8 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+// Replaced by JPA repository
+//@Repository
 public class UserRepository {
 
     private static List<User> users = new ArrayList<>();

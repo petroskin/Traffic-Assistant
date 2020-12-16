@@ -11,5 +11,36 @@
 <ul>
     <li th:each="user : ${users}"><th:block th:text="${user.getUsername()} + ' ' + ${user.getPassword()}"></th:block></li>
 </ul>
+<h1>
+    Events:
+</h1>
+<ul>
+    <li th:each="event : ${events}">
+        <th:block th:text="${event.getComment()} + ' ' + ${event.getTypeEnum()}"></th:block>
+        <th:block th:text="${event.getLatitude()} + ' ' + ${event.getLongitude()}"></th:block>
+    </li>
+</ul>
+<h2>
+    Create event:
+</h2>
+<form action="/" method="post">
+    <p>
+        <label for="latitude">Latitude:</label>
+        <input type="text" id="latitude" name="latitude">
+    </p>
+    <p>
+        <label for="longitude">Longitude:</label>
+        <input type="text" id="longitude" name="longitude">
+    </p>
+    <p>
+        <label for="type">Type:</label>
+        <input type="text" id="type" name="type">
+    </p>
+    <p>
+        <label for="comment">Comment:</label>
+        <input type="text" id="comment" name="comment">
+    </p>
+    <button type="submit">Create</button>
+</form>
 </body>
 </html>
