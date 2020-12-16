@@ -437,18 +437,18 @@
     var eventType7 = $('#eventType7');
     var eventType8 = $('#eventType8');
     function deselectAllEventTypes(){
-        eventType1.attr('src', 'img/1.png');
-        eventType2.attr('src', 'img/2.png');
-        eventType3.attr('src', 'img/3.png');
-        eventType4.attr('src', 'img/4.png');
-        eventType5.attr('src', 'img/5.png');
-        eventType6.attr('src', 'img/6.png');
-        eventType7.attr('src', 'img/7.png');
-        eventType8.attr('src', 'img/8.png');
+        eventType1.attr('src', 'images/1.png');
+        eventType2.attr('src', 'images/2.png');
+        eventType3.attr('src', 'images/3.png');
+        eventType4.attr('src', 'images/4.png');
+        eventType5.attr('src', 'images/5.png');
+        eventType6.attr('src', 'images/6.png');
+        eventType7.attr('src', 'images/7.png');
+        eventType8.attr('src', 'images/8.png');
     }
     function defaultEvent(){
         deselectAllEventTypes();
-        eventType1.attr('src', 'img/1s.png');
+        eventType1.attr('src', 'images/1s.png');
         eventTitle.prop('value', 'Traffic Jam');
         selectedEventType = 1;
     }
@@ -462,43 +462,43 @@
     });
     eventType2.click(function () {
         deselectAllEventTypes();
-        $(this).attr('src', 'img/2s.png');
+        $(this).attr('src', 'images/2s.png');
         eventTitle.prop('value', 'Accident');
         selectedEventType = 2;
     });
     eventType3.click(function () {
         deselectAllEventTypes();
-        $(this).attr('src', 'img/3s.png');
+        $(this).attr('src', 'images/3s.png');
         eventTitle.prop('value', 'Road Closed');
         selectedEventType = 3;
     });
     eventType4.click(function () {
         deselectAllEventTypes();
-        $(this).attr('src', 'img/4s.png');
+        $(this).attr('src', 'images/4s.png');
         eventTitle.prop('value', 'Slippery Road');
         selectedEventType = 4;
     });
     eventType5.click(function () {
         deselectAllEventTypes();
-        $(this).attr('src', 'img/5s.png');
+        $(this).attr('src', 'images/5s.png');
         eventTitle.prop('value', 'Foggy Road');
         selectedEventType = 5;
     });
     eventType6.click(function () {
         deselectAllEventTypes();
-        $(this).attr('src', 'img/6s.png');
+        $(this).attr('src', 'images/6s.png');
         eventTitle.prop('value', 'Police Patrol');
         selectedEventType = 6;
     });
     eventType7.click(function () {
         deselectAllEventTypes();
-        $(this).attr('src', 'img/7s.png');
+        $(this).attr('src', 'images/7s.png');
         eventTitle.prop('value', 'Bad Road');
         selectedEventType = 7;
     });
     eventType8.click(function () {
         deselectAllEventTypes();
-        $(this).attr('src', 'img/8s.png');
+        $(this).attr('src', 'images/8s.png');
         eventTitle.prop('value', 'Speed Radar');
         selectedEventType = 8;
     });
@@ -507,7 +507,7 @@
         var newEvent = {id:date.getTime(), lon:newLon, lat:newLat, type:selectedEventType, title:eventTitle.prop('value'), comment:eventComment.prop('value')};
         defaultEvent();
         eventComment.prop('value', 'Comment (you can leave this empty)');
-        var icon = new OpenLayers.Icon('img/' + newEvent.type + 'm.png', size, offset);
+        var icon = new OpenLayers.Icon('images/' + newEvent.type + 'm.png', size, offset);
         var marker = new OpenLayers.Marker(new OpenLayers.LonLat(newLon, newLat)
             .transform(
                 new OpenLayers.Projection("EPSG:4326"),
@@ -522,7 +522,7 @@
                 eventDetailsComment.text('No comment was provided.');
             eventDetailsDate.text('Reported on: ' + date.toLocaleString());
             hiddenEventID.text(marker.id);
-            eventDetailsImage.attr('src', 'img/' + newEvent.type + '.png');
+            eventDetailsImage.attr('src', 'images/' + newEvent.type + '.png');
             eventDetails.fadeIn();
             $('#controlButtons').fadeOut();
         });
