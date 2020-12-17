@@ -45,7 +45,6 @@ public class MainController
                 Double.parseDouble(longitude),
                 Integer.parseInt(type),
                 LocalDateTime.now(),
-                true,
                 comment,
                 0,
                 0,
