@@ -19,9 +19,9 @@ public class EventService {
         this.eventRepository = eventRepository;
     }
 
-    public void addEvent(User user, Double latitude, Double longitude, Integer type, LocalDateTime time, Boolean valid, String comment){
-        EventTypeEnum typeEnum = EventTypeEnum.values()[type];
-        eventRepository.save(new Event(user, latitude, longitude, typeEnum, time, valid, comment));
+    public void addEvent(User user, String name, Double latitude, Double longitude, int type, LocalDateTime time, Boolean valid, String comment, Integer likes, Integer dislikes, Integer ttl){
+        EventTypeEnum typeEnum = EventTypeEnum.values()[type]; //type is 0 to 7 for now
+        eventRepository.save(new Event(user, name, latitude, longitude, typeEnum, time, valid, comment, likes, dislikes, ttl));
     }
 
     public List<Event> getEvents()

@@ -2,9 +2,12 @@ package com.trafficassistant.model.enums;
 
 public enum EventTypeEnum
 {
-    POLICE_PATROL,
+    TRAFFIC_JAM,
     ACCIDENT,
-    HEAVY_FOG,
+    ROAD_CLOSED,
     SLIPPERY_ROAD,
-    CLOSED_ROAD
+    HEAVY_FOG,
+    POLICE_PATROL,
+    BAD_ROAD,
+    SPEED_RADAR
 }

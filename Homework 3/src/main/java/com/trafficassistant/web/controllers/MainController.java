@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @RequestMapping("/")
 public class MainController
 {
-
     private final EventService eventService;
     private final UserService userService;
 
@@ -24,39 +23,33 @@ public class MainController
     {
         this.eventService = eventService;
         this.userService = userService;
-        userService.addUser("Stojko", "stojko123", "stojko@stojko", "stojkoekral");
     }
 
     @GetMapping
     public String mainPage(Model model)
     {
-        if (!model.containsAttribute("currentUser"))
-            model.addAttribute("currentUser", userService.getByUsername("stojko123"));
-        model.addAttribute("users", userService.getUsers());
-        model.addAttribute("events", eventService.getEvents());
         return "index";
     }
 
     @PostMapping
     public String createEvent(Model model,
+                              @RequestParam String name,
                               @RequestParam String latitude,
                               @RequestParam String longitude,
                               @RequestParam String type,
                               @RequestParam String comment)
     {
         eventService.addEvent((User) model.getAttribute("currentUser"),
+                name,
                 Double.parseDouble(latitude),
                 Double.parseDouble(longitude),
                 Integer.parseInt(type),
                 LocalDateTime.now(),
                 true,
-                comment);
+                comment,
+                0,
+                0,
+                30);
         return "redirect:/";
-    }
-
-    @GetMapping(path = "/map")
-    public String map()
-    {
-        return "prototype1";
     }
 }

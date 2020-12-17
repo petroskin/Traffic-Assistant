@@ -1,46 +1,537 @@
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
-    <meta charset="UTF-8"/>
-    <title>YO</title>
+    <title>Traffic Assistant Prototype 1</title>
+    <style>
+        body{
+            margin: 0;
+        }
+        .olAlphaImg {
+            cursor: pointer;
+        }
+
+        #OpenLayers_Control_Attribution_7 {
+            visibility: hidden;
+        }
+        div.olMapViewport{
+            z-index:0;
+        }
+        #addNewEvent{
+            width: 45%;
+            height: 90%;
+            background-image: linear-gradient(#10084d, #08013e);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+            z-index: 2;
+            display: none;
+            text-align: center;
+            border-radius: 10px;
+            filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
+        }
+        #prototypeDiv{
+            width: 60%;
+            height: 90%;
+            background-color: white;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+            z-index: 3;
+            display: none;
+            border-radius: 25px;
+            font-size: 36px;
+            filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
+        }
+        #controlButtons{
+            z-index: 1;
+            position: absolute;
+            left: 90%;
+            top: 70%;
+            text-align: center;
+        }
+        #prototype{
+            z-index: 1;
+            position: absolute;
+            top: 90%;
+            left: 3%;
+            opacity: 50%;
+        }
+        #prototype:hover{
+            cursor: pointer;
+        }
+        .title{
+            color: white;
+            font-family: Helvetica, sans-serif;
+            font-size: 60px;
+        }
+        .eventTextBox{
+            font-size: 36px;
+            font-weight: 100;
+            border-radius: 50px;
+            border: 2px solid white;
+            padding: 20px;
+            width: 78%;
+            height: 8%;
+            background: transparent;
+            color: white;
+        }
+        #eventComment{
+            margin-top: 300px;
+        }
+        #eventControlButtons{
+            position: absolute;
+            bottom: 5%;
+            width: 40%;
+            transform: translate(-50%,0%);
+            left: 50%;
+        }
+        #confirmEventIcon{
+            float: right;
+            height: 100px;
+        }
+        #cancelEventIcon{
+            float: left;
+            height: 100px;
+        }
+        #addEventButton{
+            margin-top: 10%;
+            width: 60%;
+            filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
+        }
+        #locationButton{
+            width:60%;
+            opacity: 50%;
+            filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
+        }
+        .imgButton:hover{
+            cursor:pointer;
+        }
+        #tempXButton:hover{
+            cursor:pointer;
+        }
+        #chooseLocationDiv{
+            width: 100%;
+            height: 15%;
+            top:0;
+            background-color: white;
+            position: absolute;
+            z-index: 1;
+            text-align: center;
+            font-size: 60px;
+            color: #0a0341;
+            line-height: 5px;
+            filter: drop-shadow(0px 0px 15px rgba(0, 0, 0, 0.5));
+            display: none;
+        }
+        #GPSicon{
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-75%);
+            z-index: 1;
+            text-align: center;
+            filter: drop-shadow(0px 0px 15px rgba(0, 0, 0, 0.5));
+            height: 11%;
+            display: none;
+        }
+        #locationButtonsDiv{
+            z-index: 1;
+            position: absolute;
+            left: 50%;
+            top: 83%;
+            transform: translate(-50%,0%);
+            text-align: center;
+            width: 17%;
+            height: 17%;
+            display: none;
+        }
+        #cancelLocationIcon{
+            filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
+            float:left;
+            height: 67%;
+        }
+        #confirmLocationIcon{
+            filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
+            float:right;
+            height: 67%;
+        }
+        #eventsSelectionTable{
+            width: 90%;
+            position: absolute;
+            left:50%;
+            padding-top: 25px;
+            transform: translate(-50%,0%);
+            text-align: center;
+        }
+        #eventsSelectionTable td{
+            text-align: center;
+            padding: 2% 5%;
+        }
+        #eventDetailsDiv{
+            width: 45%;
+            height: 90%;
+            background-image: linear-gradient(#10084d, #08013e);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+            z-index: 2;
+            border-radius: 10px;
+            filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
+            display: none;
+        }
+        #eventTypeInDetails{
+            padding-top: 3%;
+            height: 20%;
+            margin: 0 auto;
+            display: table-cell;
+        }
+        #dateReportedInDetails{
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            opacity: 25%;
+        }
+        #titleInDetails{
+            color: white;
+            font-size: 54px;
+            padding-left: 7%;
+            margin: 0 auto;
+        }
+        #commentInDetails{
+            color: white;
+            font-size: 28px;
+            padding-left: 7.5%;
+            margin: 20px auto 0;
+        }
+        #eventDetailsControlButtons{
+            position: absolute;
+            bottom: 5%;
+            width: 40%;
+            transform: translate(-50%,0%);
+            left: 50%;
+        }
+        #closeEventDetails{
+            height: 100px;
+            float:left;
+        }
+        #deleteEvent{
+            height: 100px;
+            float:right;
+        }
+        #eventIDHiddenField{
+            display: none;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
 </head>
 <body>
-<h1>
-    All Users:
-</h1>
-<ul>
-    <li th:each="user : ${users}"><th:block th:text="${user.getUsername()} + ' ' + ${user.getPassword()}"></th:block></li>
-</ul>
-<h1>
-    Events:
-</h1>
-<ul>
-    <li th:each="event : ${events}">
-        <th:block th:text="${event.getComment()} + ' ' + ${event.getTypeEnum()}"></th:block>
-        <th:block th:text="${event.getLatitude()} + ' ' + ${event.getLongitude()}"></th:block>
-    </li>
-</ul>
-<h2>
-    Create event:
-</h2>
-<form action="/" method="post">
-    <p>
-        <label for="latitude">Latitude:</label>
-        <input type="text" id="latitude" name="latitude">
-    </p>
-    <p>
-        <label for="longitude">Longitude:</label>
-        <input type="text" id="longitude" name="longitude">
-    </p>
-    <p>
-        <label for="type">Type:</label>
-        <input type="text" id="type" name="type">
-    </p>
-    <p>
-        <label for="comment">Comment:</label>
-        <input type="text" id="comment" name="comment">
-    </p>
-    <button type="submit">Create</button>
-</form>
+<div id="mapdiv"></div>
+<script>
+    function isNumber(str) {
+        if (typeof str != "string") return false // we only process strings!
+        return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+            !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+    }
+
+    function updateUrlHash(){
+        var zoom = map.getZoom();
+        var lonLat = map.getCenter().transform(
+            new OpenLayers.Projection("EPSG:3857"),
+            new OpenLayers.Projection("EPSG:4326")
+        );
+        window.location.hash = lonLat.lon.toFixed(7) + '/' + lonLat.lat.toFixed(7) + '/' + zoom;
+    }
+
+
+    map = new OpenLayers.Map("mapdiv");
+    map.addLayer(new OpenLayers.Layer.OSM());
+
+    var pathHash = window.location.hash.substring(1).split('/');
+
+    var lon = 21.4248746;
+    var lat = 41.9960555;
+    var zoom = 14;
+    if(pathHash.length === 3) {
+        if (isNumber(pathHash[0]))
+            lon = pathHash[0];
+        if (isNumber(pathHash[1]))
+            lat = pathHash[1];
+        if (isNumber(pathHash[2]))
+            zoom = pathHash[2];
+    }
+    else{
+        window.location.hash = "21.4248746/41.9960555/14";
+    }
+
+    var lonLat = new OpenLayers.LonLat(lon, lat)
+        .transform(
+            new OpenLayers.Projection("EPSG:4326"),
+            new OpenLayers.Projection("EPSG:3857")
+        );
+
+    var markers = new OpenLayers.Layer.Markers("Markers");
+    map.addLayer(markers);
+    var size = new OpenLayers.Size(45, 45);
+    var offset = new OpenLayers.Pixel(-(size.w / 2), 0);
+
+    map.setCenter(lonLat, zoom);
+
+    //register the moveend event on the map (also catches zoomend)
+    map.events.register('moveend', map, updateUrlHash);
+
+    // var options = {
+    //   enableHighAccuracy: true,
+    //   timeout: 5000,
+    //   maximumAge: 0
+    // };
+    //
+    // function success(pos) {
+    //   var crd = pos.coords;
+    //
+    //   console.log('Your current position is:');
+    //   console.log(`Latitude : ${crd.latitude}`);
+    //   console.log(`Longitude: ${crd.longitude}`);
+    //   console.log(`More or less ${crd.accuracy} meters.`);
+    // }
+    //
+    // function error(err) {
+    //   console.warn(`ERROR(${err.code}): ${err.message}`);
+    // }
+    //
+    // console.log(navigator.geolocation.getCurrentPosition(success, error, options));
+
+</script>
+<div id="controlButtons">
+    <img src="images/locationButton.png" id="locationButton" class="imgButtonNOTREADY">
+    <img src="images/addEventButton.png" id="addEventButton" class="imgButton">
+</div>
+<div id="prototype">
+    <p><u><b>PROTOTYPE SOFTWARE!</b></u></p>
+</div>
+<div id="prototypeDiv">
+<p style="text-align: right; font-size:60px; padding-right: 10%" id="tempXButton">X</p>
+    <p style="padding-left: 5%">This is a very early prototype-concept version of the Traffic Assistant application. The following features are required for the initial release:</p>
+    <ul style="padding: 5%">
+        <li>User and Administrator system for managing events</li>
+        <li>Keeping the user records and their corresponding events in database</li>
+        <li>Locating the client's location using Geolocation</li>
+        <li>Like/Dislike system for the truthfulness of an event</li>
+        <li>Automatic event timeouts</li>
+        <li>Log-in, Sign-up, About, Contact pages</li>
+        <li>Perhaps something else?</li>
+    </ul>
+</div>
+<div id="addNewEvent">
+    <p class="title">Event Details</p>
+    <form class="eventDetails">
+        <input type="text" class="eventTextBox" id="eventTitle" value="Traffic Jam">
+        <table id="eventsSelectionTable">
+            <tr>
+                <td><img src="images/1s.png" id="eventType1" class="imgButton"></td>
+                <td><img src="images/2.png" id="eventType2" class="imgButton"></td>
+                <td><img src="images/3.png" id="eventType3" class="imgButton"></td>
+                <td><img src="images/4.png" id="eventType4" class="imgButton"></td>
+            </tr>
+            <tr>
+                <td><img src="images/5.png" id="eventType5" class="imgButton"></td>
+                <td><img src="images/6.png" id="eventType6" class="imgButton"></td>
+                <td><img src="images/7.png" id="eventType7" class="imgButton"></td>
+                <td><img src="images/8.png" id="eventType8" class="imgButton"></td>
+            </tr>
+        </table>
+        <input type="text" class="eventTextBox" id="eventComment" value="Comment (you can leave this empty)">
+        <div id="eventControlButtons">
+            <img src="images/cancelEvent.png" id="cancelEventIcon" class="imgButton">
+            <img src="images/confirmEvent.png" id="confirmEventIcon" class="imgButton">
+        </div>
+    </form>
+</div>
+<div id="eventDetailsDiv">
+    <img src="images/1.png" id="eventTypeInDetails">
+    <p id="dateReportedInDetails">Reported on: 03/12/2020 14:11</p>
+    <p id="titleInDetails">Traffic Jam</p>
+    <p id="commentInDetails">No comments provided</p>
+    <p id="eventIDHiddenField"></p>
+    <div id="eventDetailsControlButtons">
+        <img src="images/cancelEvent.png" id="closeEventDetails" class="imgButton">
+        <img src="images/deleteEvent.png" id="deleteEvent" class="imgButton">
+    </div>
+</div>
+<div id="chooseLocationDiv">
+    <p>Choose event location</p>
+</div>
+<img src="images/location.png" id="GPSicon">
+<div id="locationButtonsDiv">
+    <img src="images/cancelLocation.png" id="cancelLocationIcon" class="imgButton">
+    <img src="images/confirmLocation.png" id="confirmLocationIcon" class="imgButton">
+</div>
 </body>
+<script>
+    var finalAddNewEventButton = $('#confirmEventIcon');
+    var eventDetails = $('#eventDetailsDiv');
+    var eventDetailsTitle = $('#titleInDetails');
+    var eventDetailsComment = $('#commentInDetails');
+    var eventDetailsImage = $('#eventTypeInDetails');
+    var eventDetailsDate = $('#dateReportedInDetails');
+    var hiddenEventID = $('#eventIDHiddenField');
+    var newLon;
+    var newLat;
+    var selectedEventType = 1;
+    var eventTitle = $('#eventTitle');
+    var eventComment = $('#eventComment');
+    var markersArray = [];
+    $('#prototype').click(function () {
+        $('#prototypeDiv').fadeIn();
+    });
+    $('#tempXButton').click(function () {
+        $('#prototypeDiv').fadeOut();
+    });
+    $('#addEventButton').click(function () {
+        $('#chooseLocationDiv').fadeIn();
+        $('#locationButtonsDiv').fadeIn();
+        $('#GPSicon').fadeIn();
+        $('#controlButtons').fadeOut();
+    });
+    $('#cancelLocationIcon').click(function () {
+        $('#chooseLocationDiv').fadeOut();
+        $('#locationButtonsDiv').fadeOut();
+        $('#GPSicon').fadeOut();
+        $('#controlButtons').fadeIn();
+    });
+    $('#confirmLocationIcon').click(function() {
+        var urlHash=window.location.hash.substring(1).split('/');
+        newLon = urlHash[0];
+        newLat = urlHash[1];
+        $('#chooseLocationDiv').fadeOut();
+        $('#locationButtonsDiv').fadeOut();
+        $('#GPSicon').fadeOut();
+        //nov event objekt
+        $('#addNewEvent').fadeIn();
+    });
+    $('#cancelEventIcon').click(function () {
+        $('#addNewEvent').fadeOut();
+        $('#controlButtons').fadeIn();
+    });
+    var eventType1 = $('#eventType1');
+    var eventType2 = $('#eventType2');
+    var eventType3 = $('#eventType3');
+    var eventType4 = $('#eventType4');
+    var eventType5 = $('#eventType5');
+    var eventType6 = $('#eventType6');
+    var eventType7 = $('#eventType7');
+    var eventType8 = $('#eventType8');
+    function deselectAllEventTypes(){
+        eventType1.attr('src', 'images/1.png');
+        eventType2.attr('src', 'images/2.png');
+        eventType3.attr('src', 'images/3.png');
+        eventType4.attr('src', 'images/4.png');
+        eventType5.attr('src', 'images/5.png');
+        eventType6.attr('src', 'images/6.png');
+        eventType7.attr('src', 'images/7.png');
+        eventType8.attr('src', 'images/8.png');
+    }
+    function defaultEvent(){
+        deselectAllEventTypes();
+        eventType1.attr('src', 'images/1s.png');
+        eventTitle.prop('value', 'Traffic Jam');
+        selectedEventType = 1;
+    }
+    eventComment.click(function () {
+        if($(this).prop('value')==='Comment (you can leave this empty)'){
+            $(this).prop('value','');
+        }
+    });
+    eventType1.click(function () {
+        defaultEvent();
+    });
+    eventType2.click(function () {
+        deselectAllEventTypes();
+        $(this).attr('src', 'images/2s.png');
+        eventTitle.prop('value', 'Accident');
+        selectedEventType = 2;
+    });
+    eventType3.click(function () {
+        deselectAllEventTypes();
+        $(this).attr('src', 'images/3s.png');
+        eventTitle.prop('value', 'Road Closed');
+        selectedEventType = 3;
+    });
+    eventType4.click(function () {
+        deselectAllEventTypes();
+        $(this).attr('src', 'images/4s.png');
+        eventTitle.prop('value', 'Slippery Road');
+        selectedEventType = 4;
+    });
+    eventType5.click(function () {
+        deselectAllEventTypes();
+        $(this).attr('src', 'images/5s.png');
+        eventTitle.prop('value', 'Heavy Fog');
+        selectedEventType = 5;
+    });
+    eventType6.click(function () {
+        deselectAllEventTypes();
+        $(this).attr('src', 'images/6s.png');
+        eventTitle.prop('value', 'Police Patrol');
+        selectedEventType = 6;
+    });
+    eventType7.click(function () {
+        deselectAllEventTypes();
+        $(this).attr('src', 'images/7s.png');
+        eventTitle.prop('value', 'Bad Road');
+        selectedEventType = 7;
+    });
+    eventType8.click(function () {
+        deselectAllEventTypes();
+        $(this).attr('src', 'images/8s.png');
+        eventTitle.prop('value', 'Speed Radar');
+        selectedEventType = 8;
+    });
+    finalAddNewEventButton.click(function () {
+        var date = new Date();
+        var newEvent = {id:date.getTime(), lon:newLon, lat:newLat, type:selectedEventType, title:eventTitle.prop('value'), comment:eventComment.prop('value')};
+        defaultEvent();
+        eventComment.prop('value', 'Comment (you can leave this empty)');
+        var icon = new OpenLayers.Icon('images/' + newEvent.type + 'm.png', size, offset);
+        var marker = new OpenLayers.Marker(new OpenLayers.LonLat(newLon, newLat)
+            .transform(
+                new OpenLayers.Projection("EPSG:4326"),
+                new OpenLayers.Projection("EPSG:3857")
+            ), icon);
+        marker.id = newEvent.id;
+        marker.events.register("click", marker, function () {
+            eventDetailsTitle.text(newEvent.title);
+            if(newEvent.comment !== '' && newEvent.comment!== 'Comment (you can leave this empty)')
+                eventDetailsComment.text(newEvent.comment);
+            else
+                eventDetailsComment.text('No comment was provided.');
+            eventDetailsDate.text('Reported on: ' + date.toLocaleString());
+            hiddenEventID.text(marker.id);
+            eventDetailsImage.attr('src', 'images/' + newEvent.type + '.png');
+            eventDetails.fadeIn();
+            $('#controlButtons').fadeOut();
+        });
+        markers.addMarker(marker);
+        markersArray.push({id:newEvent.id, marker:marker});
+        $('#addNewEvent').fadeOut();
+        $('#controlButtons').fadeIn();
+    });
+    $('#closeEventDetails').click(function () {
+        eventDetails.fadeOut();
+        $('#controlButtons').fadeIn();
+    });
+    $('#deleteEvent').click(function () {
+        for(let index=0; index<markersArray.length; index++){
+            if(markersArray[index].id == hiddenEventID.text())
+            {
+                markers.removeMarker(markersArray[index].marker);
+                break;
+            }
+        }
+        eventDetails.fadeOut();
+        $('#controlButtons').fadeIn();
+    })
+</script>
 </html>
