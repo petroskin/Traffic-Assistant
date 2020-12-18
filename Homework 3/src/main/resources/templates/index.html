@@ -2,11 +2,22 @@
 <head>
     <title>Traffic Assistant Prototype 1</title>
     <style>
+        #GPSerror{
+            width: 70%;
+            height: 20%;
+            background-color: white;
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translate(-50%,10%);
+            z-index: 3;
+            display: none;
+            border-radius: 25px;
+            font-size: 36px;
+            filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
+        }
         body{
             margin: 0;
-        }
-        .olAlphaImg {
-            cursor: pointer;
         }
 
         #OpenLayers_Control_Attribution_7 {
@@ -29,36 +40,12 @@
             border-radius: 10px;
             filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
         }
-        #prototypeDiv{
-            width: 60%;
-            height: 90%;
-            background-color: white;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%,-50%);
-            z-index: 3;
-            display: none;
-            border-radius: 25px;
-            font-size: 36px;
-            filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
-        }
         #controlButtons{
             z-index: 1;
             position: absolute;
             left: 90%;
             top: 70%;
             text-align: center;
-        }
-        #prototype{
-            z-index: 1;
-            position: absolute;
-            top: 90%;
-            left: 3%;
-            opacity: 50%;
-        }
-        #prototype:hover{
-            cursor: pointer;
         }
         .title{
             color: white;
@@ -101,13 +88,9 @@
         }
         #locationButton{
             width:60%;
-            opacity: 50%;
             filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
         }
         .imgButton:hover{
-            cursor:pointer;
-        }
-        #tempXButton:hover{
             cursor:pointer;
         }
         #chooseLocationDiv{
@@ -128,7 +111,7 @@
             position: absolute;
             left: 50%;
             top: 50%;
-            transform: translate(-50%,-75%);
+            transform: translate(-50%,-90%);
             z-index: 1;
             text-align: center;
             filter: drop-shadow(0px 0px 15px rgba(0, 0, 0, 0.5));
@@ -230,21 +213,91 @@
 <body>
 <div id="mapdiv"></div>
 <script>
+    var markersArray = [];
+    var gpsMarker;
+    var gpsRadius;
+
+    function recenterMapToGPS(){
+        if(currGPSposition===undefined || currGPSposition[2]===0)
+            return;
+        map.setCenter(new OpenLayers.LonLat(currGPSposition[0], currGPSposition[1])
+            .transform(
+                new OpenLayers.Projection("EPSG:4326"),
+                new OpenLayers.Projection("EPSG:3857")
+            ));
+    }
+
     function isNumber(str) {
-        if (typeof str != "string") return false // we only process strings!
+        if (typeof str != "string") return false;// we only process strings!
         return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
             !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
     }
 
-    function updateUrlHash(){
+    function updateUrlHashAndGpsRadius(){
         var zoom = map.getZoom();
         var lonLat = map.getCenter().transform(
             new OpenLayers.Projection("EPSG:3857"),
             new OpenLayers.Projection("EPSG:4326")
         );
         window.location.hash = lonLat.lon.toFixed(7) + '/' + lonLat.lat.toFixed(7) + '/' + zoom;
+
+        updateGPSRadiusAndMarker();
     }
 
+    function getNewRadiusMarker(lonLatRadius, zoom){
+        switch(zoom){
+            case 3: zoom = 0.0465; break;
+            case 4: zoom = 0.0765; break;
+            case 5: zoom = 0.126; break;
+            case 6: zoom = 0.207; break;
+            case 7: zoom = 0.34; break;
+            case 8: zoom = 0.56; break;
+            case 9: zoom = 0.92; break;
+            case 10: zoom = 1.52; break;
+            case 11: zoom = 2.5; break;
+            case 12: zoom = 4.1; break;
+            case 13: zoom = 6.7; break;
+            case 14: zoom = 11; break;
+            case 15: zoom = 18; break;
+            case 16: zoom = 29.5; break;
+            case 17: zoom = 48.4; break;
+            case 18: zoom = 79.4; break;
+            default: break;
+            //budala sum znam ama nemashe drug nachin.. -marko
+        }
+        var meters = lonLatRadius[2] * Math.pow(zoom, 1.4);
+        var radiusSize = new OpenLayers.Size(meters/100, meters/100);
+        var radiusIcon = new OpenLayers.Icon('images/locationRadius.png', radiusSize, new OpenLayers.Pixel(-(radiusSize.w / 2), -(radiusSize.h / 2)));
+        var radiusMarker = new OpenLayers.Marker(new OpenLayers.LonLat(lonLatRadius[0], lonLatRadius[1])
+            .transform(
+                new OpenLayers.Projection("EPSG:4326"),
+                new OpenLayers.Projection("EPSG:3857")
+            ), radiusIcon);
+        radiusMarker.id = 'gpsRadius';
+        return radiusMarker;
+    }
+
+    function updateGPSRadiusAndMarker(){
+        if(currGPSposition[0] !== 0 || currGPSposition[1] !== 0 || currGPSposition[2] !== 0){
+            var radiusMarker = getNewRadiusMarker(currGPSposition, map.getZoom());
+            if(gpsRadius!==undefined)
+                markers.removeMarker(gpsRadius);
+            gpsRadius = radiusMarker;
+            markers.addMarker(radiusMarker);
+                if(gpsMarker!==undefined)
+            markers.removeMarker(gpsMarker);
+            var dotSize = new OpenLayers.Size(18, 18);
+            var icon = new OpenLayers.Icon('images/locationDot.png', dotSize, new OpenLayers.Pixel(-(dotSize.w / 2), -(dotSize.h / 2)));
+            var marker = new OpenLayers.Marker(new OpenLayers.LonLat(currGPSposition[0], currGPSposition[1])
+                .transform(
+                    new OpenLayers.Projection("EPSG:4326"),
+                    new OpenLayers.Projection("EPSG:3857")
+                ), icon);
+            marker.id = 'gps';
+            markers.addMarker(marker);
+            gpsMarker = marker;
+        }
+    }
 
     map = new OpenLayers.Map("mapdiv");
     map.addLayer(new OpenLayers.Layer.OSM());
@@ -275,54 +328,47 @@
     var markers = new OpenLayers.Layer.Markers("Markers");
     map.addLayer(markers);
     var size = new OpenLayers.Size(45, 45);
-    var offset = new OpenLayers.Pixel(-(size.w / 2), 0);
+    var offset = new OpenLayers.Pixel(-(size.w / 2), -(size.h / 2));
 
     map.setCenter(lonLat, zoom);
 
     //register the moveend event on the map (also catches zoomend)
-    map.events.register('moveend', map, updateUrlHash);
+    map.events.register('moveend', map, updateUrlHashAndGpsRadius);
 
-    // var options = {
-    //   enableHighAccuracy: true,
-    //   timeout: 5000,
-    //   maximumAge: 0
-    // };
-    //
-    // function success(pos) {
-    //   var crd = pos.coords;
-    //
-    //   console.log('Your current position is:');
-    //   console.log(`Latitude : ${crd.latitude}`);
-    //   console.log(`Longitude: ${crd.longitude}`);
-    //   console.log(`More or less ${crd.accuracy} meters.`);
-    // }
-    //
-    // function error(err) {
-    //   console.warn(`ERROR(${err.code}): ${err.message}`);
-    // }
-    //
-    // console.log(navigator.geolocation.getCurrentPosition(success, error, options));
+    var options = {
+      enableHighAccuracy: true,
+      timeout: 5000,
+      maximumAge: 0
+    };
+
+    var currGPSposition = [0, 0, 0];
+
+    function success(pos) {
+        currGPSposition[0] = pos.coords.longitude;
+        currGPSposition[1] = pos.coords.latitude;
+        currGPSposition[2] = pos.coords.accuracy;
+        updateGPSRadiusAndMarker();
+    }
+
+    async function error(err) {
+        console.warn(`ERROR(${err.code}): ${err.message}`);
+        var GPSErrorDiv = $("#GPSerror");
+        $("#GPSerrorMessage").text("Reason: " + err.message);
+        GPSErrorDiv.fadeIn();
+        await new Promise(r => setTimeout(r, 5000));
+        GPSErrorDiv.fadeOut();
+    }
+
+    navigator.geolocation.watchPosition(success, error, options);
 
 </script>
+<div id="GPSerror">
+    <h5 style="text-align: center; margin-top: 25px";>Couldn't read GPS location</h5>
+    <p style="text-align: center; font-size: 20px; margin-top: -30px;" id="GPSerrorMessage"></p>
+</div>
 <div id="controlButtons">
-    <img src="images/locationButton.png" id="locationButton" class="imgButtonNOTREADY">
+    <img src="images/locationButton.png" id="locationButton" class="imgButton">
     <img src="images/addEventButton.png" id="addEventButton" class="imgButton">
-</div>
-<div id="prototype">
-    <p><u><b>PROTOTYPE SOFTWARE!</b></u></p>
-</div>
-<div id="prototypeDiv">
-<p style="text-align: right; font-size:60px; padding-right: 10%" id="tempXButton">X</p>
-    <p style="padding-left: 5%">This is a very early prototype-concept version of the Traffic Assistant application. The following features are required for the initial release:</p>
-    <ul style="padding: 5%">
-        <li>User and Administrator system for managing events</li>
-        <li>Keeping the user records and their corresponding events in database</li>
-        <li>Locating the client's location using Geolocation</li>
-        <li>Like/Dislike system for the truthfulness of an event</li>
-        <li>Automatic event timeouts</li>
-        <li>Log-in, Sign-up, About, Contact pages</li>
-        <li>Perhaps something else?</li>
-    </ul>
 </div>
 <div id="addNewEvent">
     <p class="title">Event Details</p>
@@ -382,14 +428,9 @@
     var selectedEventType = 1;
     var eventTitle = $('#eventTitle');
     var eventComment = $('#eventComment');
-    var markersArray = [];
-    $('#prototype').click(function () {
-        $('#prototypeDiv').fadeIn();
-    });
-    $('#tempXButton').click(function () {
-        $('#prototypeDiv').fadeOut();
-    });
+
     $('#addEventButton').click(function () {
+        recenterMapToGPS();
         $('#chooseLocationDiv').fadeIn();
         $('#locationButtonsDiv').fadeIn();
         $('#GPSicon').fadeIn();
@@ -490,6 +531,7 @@
         selectedEventType = 8;
     });
     finalAddNewEventButton.click(function () {
+        console.log('log1');
         var date = new Date();
         var newEvent = {id:date.getTime(), lon:newLon, lat:newLat, type:selectedEventType, title:eventTitle.prop('value'), comment:eventComment.prop('value')};
         defaultEvent();
@@ -501,6 +543,7 @@
                 new OpenLayers.Projection("EPSG:3857")
             ), icon);
         marker.id = newEvent.id;
+        console.log('log2');
         marker.events.register("click", marker, function () {
             eventDetailsTitle.text(newEvent.title);
             if(newEvent.comment !== '' && newEvent.comment!== 'Comment (you can leave this empty)')
@@ -513,10 +556,17 @@
             eventDetails.fadeIn();
             $('#controlButtons').fadeOut();
         });
+        console.log('log3');
         markers.addMarker(marker);
+        $('.olAlphaImg').each(function() {
+            if($(this).css('width') === '45px') {
+                $(this).css('cursor', 'pointer');
+            }
+        });
         markersArray.push({id:newEvent.id, marker:marker});
         $('#addNewEvent').fadeOut();
         $('#controlButtons').fadeIn();
+        console.log('log4');
     });
     $('#closeEventDetails').click(function () {
         eventDetails.fadeOut();
@@ -532,6 +582,9 @@
         }
         eventDetails.fadeOut();
         $('#controlButtons').fadeIn();
+    });
+    $('#locationButton').click(function () {
+        recenterMapToGPS();
     })
 </script>
 </html>
