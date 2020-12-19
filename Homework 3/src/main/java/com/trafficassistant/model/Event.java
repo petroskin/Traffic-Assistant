@@ -3,15 +3,14 @@ package com.trafficassistant.model;
 import com.trafficassistant.model.enums.EventTypeEnum;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
 @Entity
 public class Event {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @ManyToOne
     User user;

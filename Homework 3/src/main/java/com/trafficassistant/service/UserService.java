@@ -1,8 +1,6 @@
 package com.trafficassistant.service;
 
 import com.trafficassistant.model.User;
-import com.trafficassistant.repository.UserRepository;
-import com.trafficassistant.repository.jpa.JpaEventRepository;
 import com.trafficassistant.repository.jpa.JpaUserRepository;
 import org.springframework.stereotype.Service;
 

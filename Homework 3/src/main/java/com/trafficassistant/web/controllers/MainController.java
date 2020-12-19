@@ -1,6 +1,7 @@
 package com.trafficassistant.web.controllers;
 
 import com.trafficassistant.model.User;
+import com.trafficassistant.model.exceptions.EventNotOnRoadException;
 import com.trafficassistant.service.EventService;
 import com.trafficassistant.service.UserService;
 import org.springframework.stereotype.Controller;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 
 @Controller
@@ -37,7 +39,7 @@ public class MainController
                               @RequestParam String latitude,
                               @RequestParam String longitude,
                               @RequestParam String type,
-                              @RequestParam String comment)
+                              @RequestParam String comment) throws FileNotFoundException, EventNotOnRoadException
     {
         eventService.addEvent((User) model.getAttribute("currentUser"),
                 name,
