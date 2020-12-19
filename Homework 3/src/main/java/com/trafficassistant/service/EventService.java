@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -20,15 +19,18 @@ public class EventService {
 
     private final JpaEventRepository eventRepository;
     private final RoadRepository roadRepository;
+    private final Collection<RoadNode> inMemoryNodes;
 
-    public EventService(JpaEventRepository eventRepository, RoadRepository roadRepository) {
+    public EventService(JpaEventRepository eventRepository, RoadRepository roadRepository) throws FileNotFoundException
+    {
         this.eventRepository = eventRepository;
         this.roadRepository = roadRepository;
+        inMemoryNodes = roadRepository.getNodes();
     }
 
-    public void addEvent(User user, String name, Double latitude, Double longitude, int type, LocalDateTime time, String comment, Integer likes, Integer dislikes, Integer ttl) throws FileNotFoundException, EventNotOnRoadException
+    public void addEvent(User user, String name, Double latitude, Double longitude, int type, LocalDateTime time, String comment, Integer likes, Integer dislikes, Integer ttl) throws EventNotOnRoadException
     {
-        if (!isOnRoad(latitude, longitude, roadRepository.getNodes()))
+        if (!isOnRoad(latitude, longitude, inMemoryNodes))
                 throw new EventNotOnRoadException("Event " + name + " must be located on a roadway.");
 
         EventTypeEnum typeEnum = EventTypeEnum.values()[type]; //type is 0 to 7 for now

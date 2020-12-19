@@ -47,12 +47,16 @@
 <h3>Welcome to </h3>
 <h1>Traffic Assistant</h1>
 <div>
-    <button>Log In</button><br/>
-    <button>Sign Up</button>
+    <form action="/user/login" method="GET">
+        <button type="submit">Log In</button><br/>
+    </form>
+    <form action="/user/register" method="GET">
+        <button type="submit">Sign Up</button>
+    </form>
 </div>
 <div id="thediv">
-    <a id="contact" href="contact.html">Contact</a>
-    <a id="about" href="about.html">About</a>
+    <a id="contact" href="/contact">Contact</a>
+    <a id="about" href="/about">About</a>
 </div>
 
 </body>

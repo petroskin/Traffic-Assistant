@@ -15,7 +15,7 @@ public class RoadRepository
         List<RoadNode> ret = new ArrayList<>();
         // TODO Configure path to nodes file
         Scanner in = new Scanner(new File(new File("").getAbsolutePath() + "\\Homework 3\\src\\main\\resources\\nodes.csv"));
-        System.out.println(in.nextLine());
+        in.nextLine();
         while (in.hasNextLine())
         {
             String [] line = in.nextLine().split(",");

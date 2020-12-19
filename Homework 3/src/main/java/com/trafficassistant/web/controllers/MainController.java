@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 
@@ -28,9 +29,29 @@ public class MainController
     }
 
     @GetMapping
-    public String mainPage(Model model)
+    public String mainPage(Model model, HttpServletRequest req)
     {
+        if (req.getSession().getAttribute("currentUser") == null)
+            return "redirect:/welcome";
         return "index";
+    }
+
+    @GetMapping(path = "/welcome")
+    public String welcomePage()
+    {
+        return "welcome";
+    }
+
+    @GetMapping(path = "/contact")
+    public String contactPage()
+    {
+        return "contact";
+    }
+
+    @GetMapping(path = "/about")
+    public String aboutPage()
+    {
+        return "about";
     }
 
     @PostMapping
@@ -39,7 +60,7 @@ public class MainController
                               @RequestParam String latitude,
                               @RequestParam String longitude,
                               @RequestParam String type,
-                              @RequestParam String comment) throws FileNotFoundException, EventNotOnRoadException
+                              @RequestParam String comment) throws EventNotOnRoadException
     {
         eventService.addEvent((User) model.getAttribute("currentUser"),
                 name,
