@@ -2,6 +2,7 @@ package com.trafficassistant.web.controllers;
 
 import com.trafficassistant.model.User;
 import com.trafficassistant.model.exceptions.InvalidCharacterInUsernameException;
+import com.trafficassistant.model.exceptions.UsernameTakenException;
 import com.trafficassistant.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -72,25 +73,56 @@ public class UserController
                                @RequestParam String fullName,
                                @RequestParam String username,
                                @RequestParam String email,
-                               @RequestParam String password)
+                               @RequestParam String password) throws InvalidCharacterInUsernameException
     {
-        // TODO check full name and email syntax
+        boolean validArgs = true;
+        String attributeCheckMessage = "";
+        if (!isValidName(fullName))
+        {
+            validArgs = false;
+            attributeCheckMessage += "Name must only contain letters and space\n";
+        }
+        if (!isValidUsername(username))
+        {
+            validArgs = false;
+            attributeCheckMessage += "Username must contain only letters, numbers and underscores.\n";
+        }
+        if (!validArgs)
+        {
+            model.addAttribute("errorMessage", attributeCheckMessage);
+            return "sign_up";
+        }
         User logged;
         try
         {
             logged = userService.register(fullName, username, email, password);
         }
-        catch (InvalidCharacterInUsernameException e)
+        catch (UsernameTakenException e)
         {
             model.addAttribute("errorMessage", e.getMessage());
-            return "log_in";
-        }
-        if (logged == null)
-        {
-            model.addAttribute("errorMessage", "Unrecognised username and/or passowrd");
-            return "log_in";
+            return "sign_up";
         }
         req.getSession().setAttribute("currentUser", logged);
         return "redirect:/";
+    }
+
+    private boolean isValidName(String name)
+    {
+        for (char c : name.toCharArray())
+        {
+            if (!Character.isLetter(c) && c != ' ')
+                return false;
+        }
+        return true;
+    }
+
+    private boolean isValidUsername(String uname)
+    {
+        for (char c : uname.toCharArray())
+        {
+            if (!Character.isLetterOrDigit(c) && c != '_')
+                return false;
+        }
+        return true;
     }
 }

@@ -2,6 +2,7 @@ package com.trafficassistant.service;
 
 import com.trafficassistant.model.User;
 import com.trafficassistant.model.exceptions.InvalidCharacterInUsernameException;
+import com.trafficassistant.model.exceptions.UsernameTakenException;
 import com.trafficassistant.repository.jpa.JpaUserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,13 +18,15 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public void addUser(String fullName, String username, String email, String password) throws InvalidCharacterInUsernameException
+    public void addUser(String fullName, String username, String email, String password) throws InvalidCharacterInUsernameException, UsernameTakenException
     {
         for (char c : username.toCharArray())
         {
             if (!Character.isLetterOrDigit(c) && c != '_')
                 throw new InvalidCharacterInUsernameException();
         }
+        if (userRepository.getByUsername(username) != null)
+            throw new UsernameTakenException(username);
         this.userRepository.save(new User(fullName, username, email, password));
     }
 
@@ -51,7 +54,7 @@ public class UserService {
     }
 
     @Transactional
-    public User register(String fullName, String username, String email, String password) throws InvalidCharacterInUsernameException
+    public User register(String fullName, String username, String email, String password) throws InvalidCharacterInUsernameException, UsernameTakenException
     {
         addUser(fullName, username, email, password);
         return logIn(username, password);
