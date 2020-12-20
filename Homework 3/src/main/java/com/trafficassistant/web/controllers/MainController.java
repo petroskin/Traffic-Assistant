@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/")
@@ -103,5 +105,33 @@ public class MainController
         else {
             return "You cannot do this action.";
         }
+    }
+
+    @GetMapping(path="/getLikesDislikes")
+    @ResponseBody
+    public List<String> getLikesDislikes(@RequestParam Long id){
+        Event event;
+        try {
+            event = eventService.findById(id);
+        }catch(EventDoesNotExistException ex){
+            List<String> lol = new ArrayList<>();
+            lol.add("no event with such id sorry mate");
+            return lol;
+        }
+        return event.getUsersLikeDislike().entrySet().stream().map(entry -> entry.getKey() + " " + (entry.getValue()?"1":"0")).collect(Collectors.toList());
+    }
+
+    @GetMapping(path="/likeOrDislike")
+    @ResponseBody
+    public String likeOrDislike(HttpServletRequest req, @RequestParam Long id, @RequestParam String like)//like=1, dislike=0, removeVote=-1
+    {
+        try {
+            eventService.likeOrDislikeEvent(id, ((User) req.getSession().getAttribute("currentUser")).getUsername(), like);
+            eventService.resetTTLById(id);
+        }
+        catch(EventDoesNotExistException ex){
+            return "Event was not found.";
+        }
+        return "success";
     }
 }

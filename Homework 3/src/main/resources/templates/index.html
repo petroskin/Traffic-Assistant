@@ -2,6 +2,71 @@
 <head>
     <title>Traffic Assistant</title>
     <style>
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltiptext {
+            visibility: hidden;
+            background-color: #0b0343;
+            color: white;
+            text-align: center;
+            border-radius: 25px;
+            padding: 5px 0;
+            position: relative;
+            z-index: 5;
+            bottom: -6px;
+            left: 41%;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        #OpenLayers_Control_Zoom_5{
+            top: unset;
+            bottom: 8px;
+        }
+        #likeDislikeMeter{
+            height: 30px;
+            position: relative;
+            bottom: -16%;
+            transform: translate(-50%, 0);
+            left: 50%;
+            width:85%;
+            border-radius: 25px;
+            border: 2px solid white;
+            overflow: hidden;
+            background-image: url("images/whitePixel.gif");
+            background-repeat: repeat-y;
+            background-size: 50%;
+        }
+        #likeDislikeMeter:after{
+            content: ' ';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 3px solid #0a0342;
+            border-radius: 25px;
+        }
+        #likeDislikeDiv{
+            position: absolute;
+            bottom: 21%;
+            width: 30%;
+            transform: translate(-50%,0%);
+            left: 50%;
+        }
+        #likeButton{
+            float: left;
+        }
+        #dislikeButton{
+            transform: rotate(180deg);
+            float:right;
+        }
         #errorDiv{
             width: 70%;
             height: 20%;
@@ -205,7 +270,7 @@
             height: 100px;
             float:right;
         }
-        #eventIDHiddenField, #currentUser, #currentUserAdminBoolean{
+        #eventIDHiddenField, #currentUser, #currentUserAdminBoolean, #likes, #total{
             display: none;
         }
     </style>
@@ -486,6 +551,15 @@
     <p id="titleInDetails">Traffic Jam</p>
     <p id="commentInDetails">No comments provided</p>
     <p id="eventIDHiddenField"></p>
+    <div id="likeDislikeMeter" class="tooltip">
+        <span id="likesDislikesText" class="tooltiptext"></span>
+    </div>
+    <div id="likeDislikeDiv">
+        <p id="likes">0</p>
+        <p id="total">0</p>
+        <img src="images/likeBlue.png" id="likeButton" class="imgButton">
+        <img src="images/likeBlue.png" id="dislikeButton" class="imgButton">
+    </div>
     <div id="eventDetailsControlButtons">
         <img src="images/cancelEvent.png" id="closeEventDetails" class="imgButton">
         <img src="images/deleteEvent.png" id="deleteEvent" class="imgButton">
@@ -519,6 +593,8 @@
     var currentUser = $("#currentUser").text();
     var closeEventDetailsButton = $("#closeEventDetails");
     var deleteEventButton = $("#deleteEvent");
+    var likeButton = $('#likeButton');
+    var dislikeButton = $('#dislikeButton');
 
     function eventEnumTypeToInt(eventEnum) {
         switch (eventEnum) {
@@ -559,6 +635,14 @@
                         ), new OpenLayers.Icon('images/' + eventEnumTypeToInt(item.typeEnum) + 'm.png', size, offset));
                     marker.id = item.id;
                     marker.events.register("click", marker, function () {
+                        var currentUserStatus = getLikesDislikesForEventId(item.id);
+                        if(currentUserStatus==="1")
+                            clickLikeButton();
+                        else if (currentUserStatus==="0")
+                            clickDislikeButton();
+                        else
+                            unclickLikeAndDislikeButtons();
+                        updateLikeDislikeMeter();
                         eventDetailsTitle.text(item.name);
                         eventDetailsComment.text(item.comment);
                         eventDetailsDate.text('Reported on: ' + item.time.replace('T', ' ').split('.')[0] + ' by ' + item.user.username);
@@ -586,6 +670,69 @@
             }
         });
 
+    }
+
+    function getLikesDislikesForEventId(id){
+        var currentUserStatus = "-1";
+        $.ajax({
+            type: 'GET',
+            url: "/getLikesDislikes",
+            data: {
+                id: id
+            },
+            contentType: 'text/plain',
+            crossDomain: false,
+            async:false,
+            success: async function (response) {
+                if (response[0] === "no event with such id sorry mate") {
+                    errorTitle.text("Couldn't get likes/dislikes");
+                    errorMessage.text("Reason: " + response[0]);
+                    errorDiv.fadeIn();
+                    await new Promise(r => setTimeout(r, 5000));
+                    errorDiv.fadeOut();
+                }
+                else{
+                    var likes = 0;
+                    var total = 0;
+                    response.forEach(function (item, index){
+                        //format is "username 1" or "username 0"
+                        if(item.split(" ")[1] === "1")
+                            likes++;
+                        total++;
+                        if(item.split(" ")[0] === currentUser)
+                            currentUserStatus = item.split(" ")[1];
+                    });
+                    $('#likes').text(likes);
+                    $('#total').text(total);
+                    $('#likesDislikesText').text('Likes: ' + likes.toString() + ', Dislikes: ' + (total-likes).toString());
+                }
+            }
+        });
+        return currentUserStatus;
+    }
+
+    function clickLikeButton(){
+        likeButton.attr('src', 'images/likeWhite.png');
+        dislikeButton.attr('src', 'images/likeBlue.png');
+    }
+
+    function clickDislikeButton(){
+        likeButton.attr('src', 'images/likeBlue.png');
+        dislikeButton.attr('src', 'images/likeWhite.png');
+    }
+
+    function unclickLikeAndDislikeButtons(){
+        likeButton.attr('src', 'images/likeBlue.png');
+        dislikeButton.attr('src', 'images/likeBlue.png');
+    }
+
+    function updateLikeDislikeMeter(){
+        var likes = parseInt($("#likes").text());
+        var total = parseInt($("#total").text());
+        if(total===0)
+            $("#likeDislikeMeter").animate({'background-size': '50%'});
+        else
+            $("#likeDislikeMeter").animate({'background-size': (likes/total)*100 + '%'});
     }
 
     function createEvent(name, lon, lat, type, comment){
@@ -755,6 +902,115 @@
     });
     $('#locationButton').click(function () {
         recenterMapToGPS();
+    });
+    likeButton.click(function () {
+        if(likeButton.attr('src').includes('White')){
+            unclickLikeAndDislikeButtons();
+            $.ajax({
+                type: 'GET',
+                url: "/likeOrDislike",
+                data: {
+                    id: hiddenEventID.text(),
+                    like: "-1"
+                },
+                contentType: 'text/plain',
+                crossDomain: false,
+                async:false,
+                success: async function (response) {
+                    if (response !== "success") {
+                        errorTitle.text("Couldn't like/dislike event");
+                        errorMessage.text("Reason: " + response);
+                        errorDiv.fadeIn();
+                        await new Promise(r => setTimeout(r, 5000));
+                        errorDiv.fadeOut();
+                    }
+                    else{
+                        getLikesDislikesForEventId(hiddenEventID.text());
+                        updateLikeDislikeMeter();
+                    }
+                }
+            });
+        }
+        else {
+            clickLikeButton();
+            $.ajax({
+                type: 'GET',
+                url: "/likeOrDislike",
+                data: {
+                    id: hiddenEventID.text(),
+                    like: "1"
+                },
+                contentType: 'text/plain',
+                crossDomain: false,
+                async: false,
+                success: async function (response) {
+                    if (response !== "success") {
+                        errorTitle.text("Couldn't like/dislike event");
+                        errorMessage.text("Reason: " + response);
+                        errorDiv.fadeIn();
+                        await new Promise(r => setTimeout(r, 5000));
+                        errorDiv.fadeOut();
+                    } else {
+                        getLikesDislikesForEventId(hiddenEventID.text());
+                        updateLikeDislikeMeter();
+                    }
+                }
+            });
+        }
+    });
+    dislikeButton.click(function () {
+        if(dislikeButton.attr('src').includes('White')){
+            unclickLikeAndDislikeButtons();
+            $.ajax({
+                type: 'GET',
+                url: "/likeOrDislike",
+                data: {
+                    id: hiddenEventID.text(),
+                    like: "-1"
+                },
+                contentType: 'text/plain',
+                crossDomain: false,
+                async: false,
+                success: async function (response) {
+                    if (response !== "success") {
+                        errorTitle.text("Couldn't like/dislike event");
+                        errorMessage.text("Reason: " + response);
+                        errorDiv.fadeIn();
+                        await new Promise(r => setTimeout(r, 5000));
+                        errorDiv.fadeOut();
+                    } else {
+                        getLikesDislikesForEventId(hiddenEventID.text());
+                        updateLikeDislikeMeter();
+                    }
+                }
+            });
+        }
+        else {
+            clickDislikeButton();
+            $.ajax({
+                type: 'GET',
+                url: "/likeOrDislike",
+                data: {
+                    id: hiddenEventID.text(),
+                    like: "0"
+                },
+                contentType: 'text/plain',
+                crossDomain: false,
+                async: false,
+                success: async function (response) {
+                    if (response !== "success") {
+                        errorTitle.text("Couldn't like/dislike event");
+                        errorMessage.text("Reason: " + response);
+                        errorDiv.fadeIn();
+                        await new Promise(r => setTimeout(r, 5000));
+                        errorDiv.fadeOut();
+                    } else {
+                        getLikesDislikesForEventId(hiddenEventID.text());
+                        updateLikeDislikeMeter();
+                    }
+                }
+            });
+        }
     });
 
     refreshAllEvents();
