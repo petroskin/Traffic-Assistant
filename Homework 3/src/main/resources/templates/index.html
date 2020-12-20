@@ -213,7 +213,70 @@
 <body>
 <div id="mapdiv"></div>
 <script>
-    var markersArray = [];
+    //preventing console errors with passive event listeners
+    const eventListenerOptionsSupported = () => {
+        let supported = false;
+
+        try {
+            const opts = Object.defineProperty({}, 'passive', {
+                get() {
+                    supported = true;
+                }
+            });
+
+            window.addEventListener('test', null, opts);
+            window.removeEventListener('test', null, opts);
+        } catch (e) {}
+
+        return supported;
+    };
+
+    const defaultOptions = {
+        passive: false,
+        capture: false
+    };
+    const supportedPassiveTypes = [
+        'scroll', 'wheel',
+        'touchstart', 'touchmove', 'touchenter', 'touchend', 'touchleave',
+        'mouseout', 'mouseleave', 'mouseup', 'mousedown', 'mousemove', 'mouseenter', 'mousewheel', 'mouseover'
+    ];
+    const getDefaultPassiveOption = (passive, eventName) => {
+        if (passive !== undefined) return passive;
+
+        return supportedPassiveTypes.indexOf(eventName) === -1 ? false : defaultOptions.passive;
+    };
+
+    const getWritableOptions = (options) => {
+        const passiveDescriptor = Object.getOwnPropertyDescriptor(options, 'passive');
+
+        return passiveDescriptor && passiveDescriptor.writable !== true && passiveDescriptor.set === undefined
+            ? Object.assign({}, options)
+            : options;
+    };
+
+    const overwriteAddEvent = (superMethod) => {
+        EventTarget.prototype.addEventListener = function (type, listener, options) {
+            const usesListenerOptions = typeof options === 'object' && options !== null;
+            const useCapture          = usesListenerOptions ? options.capture : options;
+
+            options         = usesListenerOptions ? getWritableOptions(options) : {};
+            options.passive = getDefaultPassiveOption(options.passive, type);
+            options.capture = useCapture === undefined ? defaultOptions.capture : useCapture;
+
+            superMethod.call(this, type, listener, options);
+        };
+
+        EventTarget.prototype.addEventListener._original = superMethod;
+    };
+
+    const supportsPassive = eventListenerOptionsSupported();
+
+    if (supportsPassive) {
+        const addEvent = EventTarget.prototype.addEventListener;
+        overwriteAddEvent(addEvent);
+    }
+</script>
+<script>
     var gpsMarker;
     var gpsRadius;
 
@@ -284,8 +347,8 @@
                 markers.removeMarker(gpsRadius);
             gpsRadius = radiusMarker;
             markers.addMarker(radiusMarker);
-                if(gpsMarker!==undefined)
-            markers.removeMarker(gpsMarker);
+            if(gpsMarker!==undefined)
+                markers.removeMarker(gpsMarker);
             var dotSize = new OpenLayers.Size(18, 18);
             var icon = new OpenLayers.Icon('images/locationDot.png', dotSize, new OpenLayers.Pixel(-(dotSize.w / 2), -(dotSize.h / 2)));
             var marker = new OpenLayers.Marker(new OpenLayers.LonLat(currGPSposition[0], currGPSposition[1])
@@ -296,11 +359,23 @@
             marker.id = 'gps';
             markers.addMarker(marker);
             gpsMarker = marker;
+            $('.olAlphaImg').each(function() {
+                if($(this).css('width') === '45px') {
+                    $(this).css('z-index', '5');
+                }
+            });
         }
     }
 
     map = new OpenLayers.Map("mapdiv");
-    map.addLayer(new OpenLayers.Layer.OSM());
+    //map.addLayer(new OpenLayers.Layer.OSM());
+    map.addLayer(new OpenLayers.Layer.OSM(
+        "OpenStreetMap", [
+            "https://a.tile.openstreetmap.org/${z}/${x}/${y}.png",
+            "https://b.tile.openstreetmap.org/${z}/${x}/${y}.png",
+            "https://c.tile.openstreetmap.org/${z}/${x}/${y}.png"
+        ]
+    ));
 
     var pathHash = window.location.hash.substring(1).split('/');
 
@@ -336,9 +411,9 @@
     map.events.register('moveend', map, updateUrlHashAndGpsRadius);
 
     var options = {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 0
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
     };
 
     var currGPSposition = [0, 0, 0];
@@ -428,6 +503,93 @@
     var selectedEventType = 1;
     var eventTitle = $('#eventTitle');
     var eventComment = $('#eventComment');
+
+    function eventEnumTypeToInt(eventEnum) {
+        switch (eventEnum) {
+            case 'TRAFFIC_JAM':
+                return 1;
+            case 'ACCIDENT':
+                return 2;
+            case 'ROAD_CLOSED':
+                return 3;
+            case 'SLIPPERY_ROAD':
+                return 4;
+            case 'HEAVY_FOG':
+                return 5;
+            case 'POLICE_PATROL':
+                return 6;
+            case 'BAD_ROAD':
+                return 7;
+            case 'SPEED_RADAR':
+                return 8;
+        }
+    }
+
+    function refreshAllEvents(){
+        markers.clearMarkers();
+        updateGPSRadiusAndMarker();
+        $.ajax({
+            type: 'GET',
+            url: "/getAllEvents",
+            contentType: 'text/plain',
+            crossDomain: false,
+            async:false,
+            success:function(response) {
+                response.forEach(function (item, index) {
+                    var marker = new OpenLayers.Marker(new OpenLayers.LonLat(item.longitude, item.latitude)
+                        .transform(
+                            new OpenLayers.Projection("EPSG:4326"),
+                            new OpenLayers.Projection("EPSG:3857")
+                        ), new OpenLayers.Icon('images/' + eventEnumTypeToInt(item.typeEnum) + 'm.png', size, offset));
+                    marker.id = item.id;
+                    marker.events.register("click", marker, function () {
+                        eventDetailsTitle.text(item.name);
+                        eventDetailsComment.text(item.comment);
+                        //todo item.time is not presented good
+                        eventDetailsDate.text('Reported on: ' + item.time);
+                        hiddenEventID.text(item.id);
+                        eventDetailsImage.attr('src', 'images/' + eventEnumTypeToInt(item.typeEnum) + '.png');
+                        eventDetails.fadeIn();
+                        $('#controlButtons').fadeOut();
+                    });
+                    markers.addMarker(marker);
+                })
+            }
+
+        });
+        $('.olAlphaImg').each(function() {
+            if($(this).css('width') === '45px') {
+                $(this).css('cursor', 'pointer');
+            }
+        });
+
+    }
+
+    function createEvent(name, lon, lat, type, comment){
+        if(comment === '' || comment === 'Comment (you can leave this empty)')
+            comment = 'No comment was provided.';
+        $.ajax({
+            type: 'GET',
+            url: "/createEvent",
+            data: {
+                name: name,
+                latitude: lat,
+                longitude: lon,
+                type: type,
+                comment: comment,
+            },
+            contentType: 'text/plain',
+            crossDomain: false,
+            async:false,
+            success:function(response) {
+                if(response !== "success")
+                {
+                    //display error message
+                }
+            }
+        });
+        refreshAllEvents();
+    }
 
     $('#addEventButton').click(function () {
         recenterMapToGPS();
@@ -531,60 +693,44 @@
         selectedEventType = 8;
     });
     finalAddNewEventButton.click(function () {
-        console.log('log1');
-        var date = new Date();
-        var newEvent = {id:date.getTime(), lon:newLon, lat:newLat, type:selectedEventType, title:eventTitle.prop('value'), comment:eventComment.prop('value')};
+        createEvent(eventTitle.prop('value'), newLon, newLat, selectedEventType, eventComment.prop('value'));
         defaultEvent();
         eventComment.prop('value', 'Comment (you can leave this empty)');
-        var icon = new OpenLayers.Icon('images/' + newEvent.type + 'm.png', size, offset);
-        var marker = new OpenLayers.Marker(new OpenLayers.LonLat(newLon, newLat)
-            .transform(
-                new OpenLayers.Projection("EPSG:4326"),
-                new OpenLayers.Projection("EPSG:3857")
-            ), icon);
-        marker.id = newEvent.id;
-        console.log('log2');
-        marker.events.register("click", marker, function () {
-            eventDetailsTitle.text(newEvent.title);
-            if(newEvent.comment !== '' && newEvent.comment!== 'Comment (you can leave this empty)')
-                eventDetailsComment.text(newEvent.comment);
-            else
-                eventDetailsComment.text('No comment was provided.');
-            eventDetailsDate.text('Reported on: ' + date.toLocaleString());
-            hiddenEventID.text(marker.id);
-            eventDetailsImage.attr('src', 'images/' + newEvent.type + '.png');
-            eventDetails.fadeIn();
-            $('#controlButtons').fadeOut();
-        });
-        console.log('log3');
-        markers.addMarker(marker);
-        $('.olAlphaImg').each(function() {
-            if($(this).css('width') === '45px') {
-                $(this).css('cursor', 'pointer');
-            }
-        });
-        markersArray.push({id:newEvent.id, marker:marker});
         $('#addNewEvent').fadeOut();
         $('#controlButtons').fadeIn();
-        console.log('log4');
     });
     $('#closeEventDetails').click(function () {
         eventDetails.fadeOut();
         $('#controlButtons').fadeIn();
     });
     $('#deleteEvent').click(function () {
-        for(let index=0; index<markersArray.length; index++){
-            if(markersArray[index].id == hiddenEventID.text())
-            {
-                markers.removeMarker(markersArray[index].marker);
-                break;
+        $.ajax({
+            type: 'GET',
+            url: "/deleteEvent",
+            data: {
+                id: hiddenEventID.text()
+            },
+            contentType: 'text/plain',
+            crossDomain: false,
+            async:false,
+            success:function(response) {
+                if(response !== "success")
+                {
+                    //display error message
+                }
             }
-        }
+        });
+        refreshAllEvents();
         eventDetails.fadeOut();
         $('#controlButtons').fadeIn();
     });
     $('#locationButton').click(function () {
         recenterMapToGPS();
-    })
+    });
+
+    refreshAllEvents();
+    window.setInterval(function(){
+        refreshAllEvents();
+    }, 5000);
 </script>
 </html>

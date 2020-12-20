@@ -19,7 +19,6 @@ public class Event {
     Double longitude;
     EventTypeEnum typeEnum;
     LocalDateTime time;
-    Boolean valid;
     String comment;
     Integer likes;
     Integer dislikes;

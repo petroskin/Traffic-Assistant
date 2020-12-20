@@ -45,7 +45,11 @@ public class EventService {
     // Checks whether a point on the map is on top of a road node, as taken by osmfilter.
     public static boolean isOnRoad(Double lat, Double lon, Collection<RoadNode> nodes)
     {
-        // 0.00003 correctness handled in RoadNode class
+        // 0.003 correctness handled in RoadNode class
         return nodes.contains(new RoadNode(lon, lat));
+    }
+
+    public void deleteById(Long id){
+        eventRepository.deleteById(id);
     }
 }
