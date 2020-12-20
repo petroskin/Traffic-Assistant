@@ -42,10 +42,42 @@
 
 <h1>Sign Up to use Traffic Assistant</h1>
 <form action="/user/register" method="post">
-    <input type="text" placeholder="Full Name" id="fullname" name="fullName"><br/>
-    <input type="text" placeholder="Username" id="username" name="username"> <br/>
-    <input type="email" placeholder="E-mail" id="email" name="email"> <br/>
-    <input type="password" placeholder="Password" id="password" name="password"><br/>
+    <input
+            type="text"
+            placeholder="Full Name"
+            id="fullname"
+            name="fullName"
+            pattern="^([a-zA-Z]+)([ ])([a-zA-Z]+)$"
+            title="First name spacebar Last name"
+            required
+    ><br/>
+    <input
+            type="text"
+            placeholder="Username"
+            id="username"
+            name="username"
+            pattern="^[\w\d_]{8,}$"
+            title="Username should have at least 8 characters"
+            required
+    > <br/>
+    <input
+            type="email"
+            placeholder="E-mail"
+            id="email"
+            name="email"
+            pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+            title="Invalid e-mail"
+            required
+    > <br/>
+    <input
+            type="password"
+            placeholder="Password"
+            id="password"
+            name="password"
+            pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
+            title="Password should have at least 1 letter, 1 number and 1 special character and be not less than 8 characters"
+            required
+    ><br/>
     <button type="submit">Sign Up</button>
 </form>
 </body>

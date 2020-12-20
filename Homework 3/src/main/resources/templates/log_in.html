@@ -2,6 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        async function error(err) {
+            console.warn(`ERROR(${err.code}): ${err.message}`);
+            var LogInErrorDiv = $("#LogInError");
+            $("#LogInErrorMessage").text("Reason: " + err.message);
+            LogInErrorDiv.fadeIn();
+            await new Promise(r => setTimeout(r, 5000));
+            LogInErrorDiv.fadeOut();
+        }
+    </script>
     <title>Log In</title>
     <style>
         body{
@@ -36,15 +47,39 @@
             font-size: 25px;
             text-align: center;
         }
+        h5, p{
+            color: white;
+
+        }
     </style>
 </head>
 <body>
 
 <h1>Log in to Traffic Assistant</h1>
 <form action="/user/login" method="post">
-    <input type="text" placeholder="Username" name="username"> <br/>
-    <input type="password" placeholder="Password" name="password"><br/>
-    <button type="submit">Log In</button>
+    <input
+            id="username"
+            type="text"
+            placeholder="Username"
+            name="username"
+            pattern="^[\w\d_]{8,}$"
+            title="Username should have at least 8 characters"
+            required>
+    <br/>
+    <input
+            id="password"
+            type="password"
+            placeholder="Password"
+            name="password"
+            pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
+            title="Password should have at least 1 letter, 1 number and 1 special character and be not less than 8 characters"
+            required>
+    <br/>
+
+    <button id="login" type="submit" onclick="return check()">Log In</button>
+    <div id="LogInError" hidden="hidden">
+        <p id="LogInErrorMessage">Error Message</p>
+    </div>
 </form>
 </body>
 </html>
