@@ -5,8 +5,10 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <title>Log In</title>
     <style>
+        html{
+            min-height: 100%;
+        }
         body{
-            margin-top: 80px;
             background-image: linear-gradient(#10084d, #08013e);
             font-family: Helvetica, sans-serif;
         }
@@ -14,6 +16,7 @@
             color: white;
             font-size: 50px;
             text-align: center;
+            margin-top: 60px;
         }
         form{
             text-align: center;
@@ -24,6 +27,7 @@
             padding: 5px;
             background-color: #10074c;
             color: white;
+            border-color: white;
             border-radius: 50px;
             font-size: 25px;
         }
@@ -39,12 +43,18 @@
         }
         h5, p{
             color: white;
-
+        }
+        a{
+            display: flex;
+            max-height: 10px;
+            margin: 2%;
+            color: white;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-
+<a id="back" href="/welcome">Back</a>
 <h1>Log in to Traffic Assistant</h1>
 <form action="/user/login" method="post">
     <input
