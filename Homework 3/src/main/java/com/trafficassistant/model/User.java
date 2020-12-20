@@ -16,12 +16,14 @@ public class User {
     String fullName;
     String email;
     String password;
+    Boolean admin;
 
     public User(String fullName, String username, String email, String password) {
         this.fullName = fullName;
         this.username = username;
         this.email = email;
         this.password = password;
+        this.admin = false;
     }
 
     // Constructor needed for JPA

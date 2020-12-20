@@ -2,6 +2,7 @@ package com.trafficassistant.web.controllers;
 
 import com.trafficassistant.model.Event;
 import com.trafficassistant.model.User;
+import com.trafficassistant.model.exceptions.EventDoesNotExistException;
 import com.trafficassistant.model.exceptions.EventNotOnRoadException;
 import com.trafficassistant.service.EventService;
 import com.trafficassistant.service.UserService;
@@ -28,10 +29,10 @@ public class MainController
     }
 
     @GetMapping
-    public String mainPage(Model model, HttpServletRequest req)
+    public String mainPage(HttpServletRequest req)
     {
-        //if (req.getSession().getAttribute("currentUser") == null)
-            //return "redirect:/welcome";
+        if (req.getSession().getAttribute("currentUser") == null)
+            return "redirect:/welcome";
         return "index";
     }
 
@@ -55,7 +56,7 @@ public class MainController
 
     @GetMapping(path="/createEvent")
     @ResponseBody
-    public String createEvent(Model model,
+    public String createEvent(HttpServletRequest req,
                               @RequestParam String name,
                               @RequestParam String latitude,
                               @RequestParam String longitude,
@@ -63,7 +64,7 @@ public class MainController
                               @RequestParam String comment)
     {
         try {
-            eventService.addEvent((User) model.getAttribute("currentUser"),
+            eventService.addEvent((User) req.getSession().getAttribute("currentUser"),
                     name,
                     Double.parseDouble(latitude),
                     Double.parseDouble(longitude),
@@ -89,8 +90,19 @@ public class MainController
 
     @GetMapping(path="/deleteEvent")
     @ResponseBody
-    public String deleteEvent(@RequestParam Long id){
-        eventService.deleteById(id);
-        return "success"; //not fully implemented
+    public String deleteEvent(HttpServletRequest req, @RequestParam Long id){
+        Event event;
+        try {
+            event = eventService.findById(id);
+        }catch(EventDoesNotExistException ex){
+            return ex.getMessage();
+        }
+        if(event.getUser().getUsername().equals(((User)req.getSession().getAttribute("currentUser")).getUsername())) {
+            eventService.deleteById(id);
+            return "success";
+        }
+        else {
+            return "You cannot do this action.";
+        }
     }
 }

@@ -4,6 +4,7 @@ import com.trafficassistant.model.Event;
 import com.trafficassistant.model.RoadNode;
 import com.trafficassistant.model.enums.EventTypeEnum;
 import com.trafficassistant.model.User;
+import com.trafficassistant.model.exceptions.EventDoesNotExistException;
 import com.trafficassistant.model.exceptions.EventNotOnRoadException;
 import com.trafficassistant.repository.RoadRepository;
 import com.trafficassistant.repository.jpa.JpaEventRepository;
@@ -13,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EventService {
@@ -51,5 +53,9 @@ public class EventService {
 
     public void deleteById(Long id){
         eventRepository.deleteById(id);
+    }
+
+    public Event findById(Long id) throws EventDoesNotExistException {
+        return eventRepository.findById(id).orElseThrow(() -> new EventDoesNotExistException(id));
     }
 }
