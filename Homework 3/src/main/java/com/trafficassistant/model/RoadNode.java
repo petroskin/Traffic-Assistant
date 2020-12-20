@@ -33,7 +33,7 @@ public class RoadNode
         RoadNode roadNode = (RoadNode) o;
 //        return lat.equals(roadNode.lat) && lon.equals(roadNode.lon);
         // Accuracy
-        return Math.abs(lat - roadNode.lat) < 0.003 && Math.abs(lon - roadNode.lon) < 0.003;
+        return Math.abs(lat - roadNode.lat) < 0.007 && Math.abs(lon - roadNode.lon) < 0.007;
     }
 
     @Override

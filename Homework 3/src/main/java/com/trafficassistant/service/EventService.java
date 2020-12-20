@@ -30,13 +30,13 @@ public class EventService {
         inMemoryNodes = roadRepository.getNodes();
     }
 
-    public void addEvent(User user, String name, Double latitude, Double longitude, int type, LocalDateTime time, String comment, Integer likes, Integer dislikes, Integer ttl) throws EventNotOnRoadException
+    public void addEvent(User user, String name, Double latitude, Double longitude, int type, LocalDateTime time, String comment, Integer ttl) throws EventNotOnRoadException
     {
         if (!isOnRoad(latitude, longitude, inMemoryNodes))
                 throw new EventNotOnRoadException("Event " + name + " must be located on a roadway.");
 
         EventTypeEnum typeEnum = EventTypeEnum.values()[type]; //type is 0 to 7 for now
-        eventRepository.save(new Event(user, name, latitude, longitude, typeEnum, time, comment, likes, dislikes, ttl));
+        eventRepository.save(new Event(user, name, latitude, longitude, typeEnum, time, comment, ttl));
     }
 
     public List<Event> getEvents()
@@ -47,7 +47,7 @@ public class EventService {
     // Checks whether a point on the map is on top of a road node, as taken by osmfilter.
     public static boolean isOnRoad(Double lat, Double lon, Collection<RoadNode> nodes)
     {
-        // 0.003 correctness handled in RoadNode class
+        // 0.007 correctness handled in RoadNode class
         return nodes.contains(new RoadNode(lon, lat));
     }
 

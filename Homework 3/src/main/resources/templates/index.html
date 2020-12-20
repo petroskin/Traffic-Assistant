@@ -205,10 +205,7 @@
             height: 100px;
             float:right;
         }
-        #eventIDHiddenField{
-            display: none;
-        }
-        #currentUser{
+        #eventIDHiddenField, #currentUser, #currentUserAdminBoolean{
             display: none;
         }
     </style>
@@ -219,6 +216,7 @@
 <div id="mapdiv"></div>
 <th:block>
     <p th:text="${session.currentUser.username}" id="currentUser"></p>
+    <p th:text="${session.currentUser.admin}" id="currentUserAdminBoolean"></p>
 </th:block>
 <script>
     //preventing console errors with passive event listeners
@@ -566,7 +564,7 @@
                         eventDetailsDate.text('Reported on: ' + item.time.replace('T', ' ').split('.')[0] + ' by ' + item.user.username);
                         hiddenEventID.text(item.id);
                         eventDetailsImage.attr('src', 'images/' + eventEnumTypeToInt(item.typeEnum) + '.png');
-                        if(item.user.username === currentUser || item.user.admin === true){
+                        if(item.user.username === currentUser || $("#currentUserAdminBoolean").text() === "true"){
                             deleteEventButton.css('display', 'initial');
                             closeEventDetailsButton.css('float', 'left');
                         }

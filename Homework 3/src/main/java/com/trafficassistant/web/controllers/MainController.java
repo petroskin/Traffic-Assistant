@@ -71,8 +71,6 @@ public class MainController
                     Integer.parseInt(type)-1,
                     LocalDateTime.now(),
                     comment,
-                    0,
-                    0,
                     30);
         }
         catch(EventNotOnRoadException ex){
@@ -91,13 +89,14 @@ public class MainController
     @GetMapping(path="/deleteEvent")
     @ResponseBody
     public String deleteEvent(HttpServletRequest req, @RequestParam Long id){
+        User currentUser = ((User)req.getSession().getAttribute("currentUser"));
         Event event;
         try {
             event = eventService.findById(id);
         }catch(EventDoesNotExistException ex){
             return ex.getMessage();
         }
-        if(event.getUser().getUsername().equals(((User)req.getSession().getAttribute("currentUser")).getUsername())) {
+        if(event.getUser().getUsername().equals(currentUser.getUsername()) || currentUser.getAdmin()) {
             eventService.deleteById(id);
             return "success";
         }
