@@ -1,18 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script>
-        async function error(err) {
-            console.warn(`ERROR(${err.code}): ${err.message}`);
-            var LogInErrorDiv = $("#LogInError");
-            $("#LogInErrorMessage").text("Reason: " + err.message);
-            LogInErrorDiv.fadeIn();
-            await new Promise(r => setTimeout(r, 5000));
-            LogInErrorDiv.fadeOut();
-        }
-    </script>
     <title>Log In</title>
     <style>
         body{
@@ -62,8 +52,8 @@
             type="text"
             placeholder="Username"
             name="username"
-            pattern="^[\w\d_]{8,}$"
-            title="Username should have at least 8 characters"
+            pattern="^[\w\d_]{3,}$"
+            title="Username should have at least 3 characters"
             required>
     <br/>
     <input
@@ -71,14 +61,12 @@
             type="password"
             placeholder="Password"
             name="password"
-            pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
-            title="Password should have at least 1 letter, 1 number and 1 special character and be not less than 8 characters"
             required>
     <br/>
 
-    <button id="login" type="submit" onclick="return check()">Log In</button>
-    <div id="LogInError" hidden="hidden">
-        <p id="LogInErrorMessage">Error Message</p>
+    <button id="login" type="submit">Log In</button>
+    <div th:if="${errorMessage!=null&&!errorMessage.isEmpty()}" id="LogInError">
+        <p id="LogInErrorMessage"><th:block th:text="${errorMessage}"></th:block></p>
     </div>
 </form>
 </body>

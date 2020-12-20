@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Sign Up</title>
@@ -36,6 +36,10 @@
             font-size: 25px;
             text-align: center;
         }
+        h5, p{
+            color: white;
+
+        }
     </style>
 </head>
 <body>
@@ -56,8 +60,8 @@
             placeholder="Username"
             id="username"
             name="username"
-            pattern="^[\w\d_]{8,}$"
-            title="Username should have at least 8 characters"
+            pattern="^[\w\d_]{3,}$"
+            title="Username should have at least 3 characters"
             required
     > <br/>
     <input
@@ -65,8 +69,6 @@
             placeholder="E-mail"
             id="email"
             name="email"
-            pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-            title="Invalid e-mail"
             required
     > <br/>
     <input
@@ -74,11 +76,12 @@
             placeholder="Password"
             id="password"
             name="password"
-            pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
-            title="Password should have at least 1 letter, 1 number and 1 special character and be not less than 8 characters"
             required
     ><br/>
     <button type="submit">Sign Up</button>
+    <div th:if="${errorMessage!=null&&!errorMessage.isEmpty()}" id="LogInError">
+        <p id="LogInErrorMessage"><th:block th:text="${errorMessage}"></th:block></p>
+    </div>
 </form>
 </body>
 </html>
