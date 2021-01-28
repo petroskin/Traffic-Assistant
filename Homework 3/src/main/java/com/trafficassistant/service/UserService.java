@@ -1,6 +1,7 @@
 package com.trafficassistant.service;
 
 import com.trafficassistant.model.User;
+import com.trafficassistant.model.exceptions.EmailTakenException;
 import com.trafficassistant.model.exceptions.InvalidCharacterInUsernameException;
 import com.trafficassistant.model.exceptions.UsernameTakenException;
 import com.trafficassistant.repository.jpa.JpaUserRepository;
@@ -18,8 +19,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public void addUser(String fullName, String username, String email, String password) throws InvalidCharacterInUsernameException, UsernameTakenException
-    {
+    public void addUser(String fullName, String username, String email, String password) throws InvalidCharacterInUsernameException, UsernameTakenException, EmailTakenException {
         for (char c : username.toCharArray())
         {
             if (!Character.isLetterOrDigit(c) && c != '_')
@@ -27,6 +27,8 @@ public class UserService {
         }
         if (userRepository.getByUsername(username) != null)
             throw new UsernameTakenException(username);
+        if (userRepository.getByEmail(email) != null)
+            throw new EmailTakenException(email);
         this.userRepository.save(new User(fullName, username, email, password));
     }
 
@@ -54,8 +56,7 @@ public class UserService {
     }
 
     @Transactional
-    public User register(String fullName, String username, String email, String password) throws InvalidCharacterInUsernameException, UsernameTakenException
-    {
+    public User register(String fullName, String username, String email, String password) throws InvalidCharacterInUsernameException, UsernameTakenException, EmailTakenException {
         addUser(fullName, username, email, password);
         return logIn(username, password);
     }

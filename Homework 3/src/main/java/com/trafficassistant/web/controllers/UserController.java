@@ -1,6 +1,7 @@
 package com.trafficassistant.web.controllers;
 
 import com.trafficassistant.model.User;
+import com.trafficassistant.model.exceptions.EmailTakenException;
 import com.trafficassistant.model.exceptions.InvalidCharacterInUsernameException;
 import com.trafficassistant.model.exceptions.UsernameTakenException;
 import com.trafficassistant.service.UserService;
@@ -97,7 +98,7 @@ public class UserController
         {
             logged = userService.register(fullName, username, email, password);
         }
-        catch (UsernameTakenException e)
+        catch (UsernameTakenException | EmailTakenException e)
         {
             model.addAttribute("errorMessage", e.getMessage());
             return "sign_up";
