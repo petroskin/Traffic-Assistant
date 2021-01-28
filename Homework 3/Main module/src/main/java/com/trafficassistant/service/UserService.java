@@ -21,7 +21,7 @@ public class UserService {
             if (!Character.isLetterOrDigit(c) && c != '_' && c != '.' && c != '@')
                 throw new InvalidCharacterInUsernameException();
         }
-        return restTemplate.postForObject("http://localhost:9090/users-rest/login", usernameOrEmail + "\t" + password, User.class);
+        return restTemplate.postForObject("http://USER-SERVICE/users-rest/login", usernameOrEmail + "\t" + password, User.class);
     }
 
     public User register(String fullName, String username, String email, String password) throws InvalidCharacterInUsernameException, UsernameTakenException, EmailTakenException {
@@ -30,7 +30,7 @@ public class UserService {
             if (!Character.isLetterOrDigit(c) && c != '_')
                 throw new InvalidCharacterInUsernameException();
         }
-        User user = restTemplate.postForObject("http://localhost:9090/users-rest/register", new User(fullName, username, email, password), User.class);
+        User user = restTemplate.postForObject("http://USER-SERVICE/users-rest/register", new User(fullName, username, email, password), User.class);
         if (user == null) return null;
         if (user.getUsername() == null)
         {
