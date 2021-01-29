@@ -17,45 +17,86 @@ public class UserService
         this.userRepository = userRepository;
     }
 
-    public String addUser(User user) {
-        if (userRepository.getByUsername(user.getUsername()) != null)
-            return "UsernameTakenException";
-        if (userRepository.getByEmail(user.getEmail()) != null)
-            return "EmailTakenException";
-        this.userRepository.save(user);
-        return "ok";
+    public String addUser(User user)
+    {
+        StringBuilder returnStatus = new StringBuilder("ok");
+        if (!taken(user, returnStatus))
+            this.userRepository.save(user);
+        return returnStatus.toString();
     }
 
-    public List<User> getUsers()
-    {
-        return this.userRepository.findAll();
-    }
+//    Not used
+
+//    public List<User> getUsers()
+//    {
+//        return this.userRepository.findAll();
+//    }
 
     public User getByUsername(String username)
     {
-        return userRepository.findById(username).orElse(null);
+        User get = userRepository.findById(username).orElse(null);
+        return get == null ? null : userToReturn(get);
     }
 
     public User logIn(String info)
     {
-        String [] infos = info.split("\t");
-        User ret = null;
-        if (infos[0].contains("@"))
-            ret = userRepository.getByEmailAndPassword(infos[0], infos[1]);
-        else
-            ret = userRepository.getByUsernameAndPassword(infos[0], infos[1]);
-        if (ret == null) return null;
-        return new User(ret.getFullName(), ret.getUsername(), ret.getEmail(), "");
+        String[] credentials = info.split("\t");
+        User ret = loginCheck(credentials);
+        if (ret == null)
+            return null;
+        return userToReturn(ret);
     }
 
     @Transactional
-    public User register(User user) {
+    public User register(User user)
+    {
         String ret = addUser(user);
         if (ret.equals("ok"))
             return logIn(user.getUsername() + "\t" + user.getPassword());
-        User retUser = new User();
-        retUser.setUsername(null);
-        retUser.setFullName(ret);
-        return retUser;
+        return new User(ret, null, null, null);
+    }
+
+    private User loginCheck(String [] credentials)
+    {
+        if (credentials[0].contains("@"))
+            return loginWithEmailCheck(credentials);
+        else
+            return loginWithUsernameCheck(credentials);
+    }
+
+    private boolean taken(User user, StringBuilder status)
+    {
+        if (emailTaken(user.getEmail()))
+            status = new StringBuilder("EmailTakenException");
+        if (usernameTaken(user.getUsername()))
+            status = new StringBuilder("UsernameTakenException");
+        return !status.toString().equals("ok");
+    }
+
+    private User loginWithEmailCheck(String [] credentials)
+    {
+        return userRepository.getByEmailAndPassword(credentials[0], credentials[1]);
+    }
+
+    private User loginWithUsernameCheck(String [] credentials)
+    {
+        return userRepository.getByUsernameAndPassword(credentials[0], credentials[1]);
+    }
+
+    private boolean emailTaken(String email)
+    {
+        return userRepository.getByEmail(email) != null;
+    }
+
+    private boolean usernameTaken(String username)
+    {
+        return userRepository.getByUsername(username) != null;
+    }
+
+    private User userToReturn(User user)
+    {
+        User ret = new User(user.getFullName(), user.getUsername(), user.getEmail(), "");
+        ret.setAdmin(user.getAdmin());
+        return ret;
     }
 }

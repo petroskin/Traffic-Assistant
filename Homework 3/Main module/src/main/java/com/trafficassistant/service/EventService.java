@@ -15,20 +15,17 @@ import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class EventService {
 
     private final JpaEventRepository eventRepository;
-    private final RoadRepository roadRepository;
     private final Collection<RoadNode> inMemoryNodes;
 
     public EventService(JpaEventRepository eventRepository, RoadRepository roadRepository) throws FileNotFoundException
     {
         this.eventRepository = eventRepository;
-        this.roadRepository = roadRepository;
         inMemoryNodes = roadRepository.getNodes();
     }
 

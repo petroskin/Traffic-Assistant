@@ -17,7 +17,6 @@ public class RoadRepository
         List<RoadNode> ret = new ArrayList<>();
         String currentPath = new File("").getAbsolutePath();
         Scanner in;
-        // TODO Configure path to nodes file
         if(Files.exists(Paths.get(currentPath + File.separator + "Homework 3"))){
             in = new Scanner(new File(new File("").getAbsolutePath() + File.separator + "Homework 3"
                     + File.separator + "Main module" + File.separator + "src" + File.separator + "main" + File.separator + "resources" +

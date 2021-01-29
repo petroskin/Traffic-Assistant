@@ -76,21 +76,10 @@ public class UserController
                                @RequestParam String email,
                                @RequestParam String password) throws InvalidCharacterInUsernameException
     {
-        boolean validArgs = true;
-        String attributeCheckMessage = "";
-        if (!isValidName(fullName))
+        StringBuilder attributeCheckMessage = new StringBuilder("");
+        if (!checkValidity(new User(fullName, username, email, password), attributeCheckMessage))
         {
-            validArgs = false;
-            attributeCheckMessage += "Name must only contain letters and space\n";
-        }
-        if (!isValidUsername(username))
-        {
-            validArgs = false;
-            attributeCheckMessage += "Username must contain only letters, numbers and underscores.\n";
-        }
-        if (!validArgs)
-        {
-            model.addAttribute("errorMessage", attributeCheckMessage);
+            model.addAttribute("errorMessage", attributeCheckMessage.toString());
             return "sign_up";
         }
         User logged;
@@ -107,23 +96,32 @@ public class UserController
         return "redirect:/";
     }
 
-    private boolean isValidName(String name)
+    private boolean checkValidity(User user, StringBuilder sb)
     {
-        for (char c : name.toCharArray())
-        {
-            if (!Character.isLetter(c) && c != ' ')
-                return false;
-        }
-        return true;
+        if (isValid(user.getFullName(), false))
+            sb.append("Name must only contain letters and space\n");
+        if (isValid(user.getUsername(), true))
+            sb.append("Username must contain only letters, numbers and underscores.\n");
+        return sb.toString().equals("");
     }
 
-    private boolean isValidUsername(String uname)
+    private boolean isValid(String credential, boolean username)
     {
-        for (char c : uname.toCharArray())
+        for (char c : credential.toCharArray())
         {
-            if (!Character.isLetterOrDigit(c) && c != '_')
+            if (username ? invalidUsername(c) : invalidName(c))
                 return false;
         }
-        return true;
+        return false;
+    }
+
+    private boolean invalidName(char c)
+    {
+        return !Character.isLetter(c) && c != ' ';
+    }
+
+    private boolean invalidUsername(char c)
+    {
+        return !Character.isLetterOrDigit(c) && c != '_';
     }
 }

@@ -29,4 +29,10 @@ public class UserController
     {
         return userService.logIn(info);
     }
+
+    @PostMapping("/get-by-username")
+    public User getByUsername(@RequestBody String username)
+    {
+        return userService.getByUsername(username);
+    }
 }
