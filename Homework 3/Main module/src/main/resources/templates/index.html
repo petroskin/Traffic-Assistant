@@ -1071,6 +1071,10 @@
         }
     });
 
+    $("#logout").click(function(){
+        location.href = '/user/logout';
+    });
+
     refreshAllEvents();
     window.setInterval(function(){
         refreshAllEvents();

@@ -34,6 +34,13 @@ public class UserController
         return "log_in";
     }
 
+    @GetMapping(path = "/logout")
+    public String logout(HttpServletRequest req)
+    {
+        req.getSession().invalidate();
+        return "redirect:/welcome";
+    }
+
     @GetMapping(path = "/register")
     public String registerPage(HttpServletRequest req)
     {
