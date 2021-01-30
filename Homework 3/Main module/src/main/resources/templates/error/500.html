@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>An error has occured</title>
+    <style>
+        html{
+            min-height: 100%;
+        }
+        body{
+            background-image: linear-gradient(#10084d, #08013e);
+            font-family: Helvetica, sans-serif;
+        }
+        h1{
+            color: white;
+            font-size: 50px;
+            text-align: center;
+            margin-top: 60px;
+        }
+        #text{
+            color: white;
+            font-size: 20px;
+            margin: 2% 20%;
+            text-align: center;
+        }
+        button{
+            width: 260px;
+            margin: 10px;
+            padding: 5px;
+            background-color: white;
+            color: #10074c;
+            border-radius: 50px;
+            font-size: 25px;
+            text-align: center;
+        }
+        #center{
+            text-align: center;
+        }
+        button:hover{
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<h1>Uh oh. An error has occurred!</h1>
+<div id="text">
+    A server error has occurred. If you have just started the server, it is most likely due to some services still being loaded. <br><br>
+    Please allow up to 30 seconds before trying again.
+</div>
+<div id="center">
+    <form action="/welcome" method="get">
+        <button type="submit">Try Again</button>
+    </form>
+</div>
+</body>
+</html>
