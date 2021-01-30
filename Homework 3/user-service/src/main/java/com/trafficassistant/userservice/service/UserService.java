@@ -67,9 +67,15 @@ public class UserService
     private boolean taken(User user, StringBuilder status)
     {
         if (emailTaken(user.getEmail()))
-            status = new StringBuilder("EmailTakenException");
+        {
+            status.setLength(0);
+            status.append("EmailTakenException");
+        }
         if (usernameTaken(user.getUsername()))
-            status = new StringBuilder("UsernameTakenException");
+        {
+            status.setLength(0);
+            status.append("UsernameTakenException");
+        }
         return !status.toString().equals("ok");
     }
 
