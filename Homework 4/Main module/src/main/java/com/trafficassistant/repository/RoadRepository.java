@@ -17,17 +17,8 @@ public class RoadRepository
         List<RoadNode> ret = new ArrayList<>();
         String currentPath = new File("").getAbsolutePath();
         Scanner in;
-        if(Files.exists(Paths.get(currentPath + File.separator + "Homework 3"))){
-            in = new Scanner(new File(new File("").getAbsolutePath() + File.separator + "Homework 3"
-                    + File.separator + "Main module" + File.separator + "src" + File.separator + "main" + File.separator + "resources" +
-                    File.separator + "nodes.csv"));
-        }
-        //for heroku
-        else{
-            in = new Scanner(new File(new File("").getAbsolutePath() + File.separator + "Main module" + File.separator + "src" +
-                    File.separator + "main" + File.separator + "resources" +
-                    File.separator + "nodes.csv"));
-        }
+        in = new Scanner(Objects.requireNonNull(this.getClass().getClassLoader()
+                .getResourceAsStream("nodes.csv")));
         in.nextLine();
         while (in.hasNextLine())
         {
