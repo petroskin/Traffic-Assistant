@@ -1,3 +1,0 @@
-Use --update-map to download the latest map of North Macedonia
-Use --update-nodes to store the path nodes to nodes.csv file
-Use --update-all to download the latest map and store the nodes to a .csv file
