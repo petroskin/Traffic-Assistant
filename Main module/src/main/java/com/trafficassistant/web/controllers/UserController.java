@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -52,7 +53,7 @@ public class UserController
                                @RequestParam String fullName,
                                @RequestParam String username,
                                @RequestParam String email,
-                               @RequestParam String password) throws InvalidCharacterInUsernameException
+                               @RequestParam String password) throws InvalidCharacterInUsernameException, ServletException
     {
         StringBuilder attributeCheckMessage = new StringBuilder("");
         if (!checkValidity(new User(fullName, username, email, password), attributeCheckMessage))
@@ -69,6 +70,7 @@ public class UserController
             model.addAttribute("errorMessage", e.getMessage());
             return "sign_up";
         }
+        req.login(username, password);
         return "redirect:/user/login";
     }
 
