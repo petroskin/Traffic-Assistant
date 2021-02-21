@@ -5,6 +5,7 @@ import com.trafficassistant.model.exceptions.EmailTakenException;
 import com.trafficassistant.model.exceptions.InvalidCharacterInUsernameException;
 import com.trafficassistant.model.exceptions.UsernameTakenException;
 import com.trafficassistant.service.UserService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,58 +22,28 @@ public class UserController
 {
     private final UserService userService;
 
+
     public UserController(UserService userService)
     {
         this.userService = userService;
     }
 
     @GetMapping(path = "/login")
-    public String loginPage(HttpServletRequest req)
+    public String loginPage(HttpServletRequest req, @RequestParam(required = false) String error, Model model)
     {
-        if (req.getSession().getAttribute("currentUser") != null)
+        if (req.getRemoteUser() != null && !"".equals(req.getRemoteUser()))
             return "redirect:/";
+        if (error != null)
+            model.addAttribute("errorMessage", "Unrecognised username and/or password");
         return "log_in";
-    }
-
-    @GetMapping(path = "/logout")
-    public String logout(HttpServletRequest req)
-    {
-        req.getSession().invalidate();
-        return "redirect:/welcome";
     }
 
     @GetMapping(path = "/register")
     public String registerPage(HttpServletRequest req)
     {
-        if (req.getSession().getAttribute("currentUser") != null)
+        if (req.getRemoteUser() != null && !"".equals(req.getRemoteUser()))
             return "redirect:/";
         return "sign_up";
-    }
-
-    @PostMapping(path = "/login")
-    public String loginUser(HttpServletRequest req,
-                            HttpServletResponse resp,
-                            Model model,
-                            @RequestParam String username,
-                            @RequestParam String password)
-    {
-        User logged;
-        try
-        {
-            logged = userService.logIn(username, password);
-        }
-        catch (InvalidCharacterInUsernameException e)
-        {
-            model.addAttribute("errorMessage", e.getMessage());
-            return "log_in";
-        }
-        if (logged == null)
-        {
-            model.addAttribute("errorMessage", "Unrecognised username and/or passowrd");
-            return "log_in";
-        }
-        req.getSession().setAttribute("currentUser", logged);
-        return "redirect:/";
     }
 
     @PostMapping(path = "/register")
@@ -89,18 +60,16 @@ public class UserController
             model.addAttribute("errorMessage", attributeCheckMessage.toString());
             return "sign_up";
         }
-        User logged;
         try
         {
-            logged = userService.register(fullName, username, email, password);
+            userService.register(fullName, username, email, password);
         }
         catch (UsernameTakenException | EmailTakenException e)
         {
             model.addAttribute("errorMessage", e.getMessage());
             return "sign_up";
         }
-        req.getSession().setAttribute("currentUser", logged);
-        return "redirect:/";
+        return "redirect:/user/login";
     }
 
     private boolean checkValidity(User user, StringBuilder sb)

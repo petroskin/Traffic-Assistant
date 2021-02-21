@@ -29,13 +29,13 @@ public class EventService {
         inMemoryNodes = roadRepository.getNodes();
     }
 
-    public void addEvent(User user, String name, Double latitude, Double longitude, int type, LocalDateTime time, String comment, Integer ttl) throws EventNotOnRoadException
+    public void addEvent(String username, String name, Double latitude, Double longitude, int type, LocalDateTime time, String comment, Integer ttl) throws EventNotOnRoadException
     {
         if (!isOnRoad(latitude, longitude, inMemoryNodes))
                 throw new EventNotOnRoadException("Event " + name + " must be located on a roadway.");
 
         EventTypeEnum typeEnum = EventTypeEnum.values()[type]; //type is 0 to 7 for now
-        eventRepository.save(new Event(user.getUsername(), name, latitude, longitude, typeEnum, time, comment, ttl));
+        eventRepository.save(new Event(username, name, latitude, longitude, typeEnum, time, comment, ttl));
     }
 
     public List<Event> getEvents()

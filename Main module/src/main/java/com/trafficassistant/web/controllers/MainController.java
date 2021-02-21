@@ -7,11 +7,9 @@ import com.trafficassistant.model.exceptions.EventNotOnRoadException;
 import com.trafficassistant.service.EventService;
 import com.trafficassistant.service.UserService;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,17 +20,29 @@ import java.util.stream.Collectors;
 public class MainController
 {
     private final EventService eventService;
+    private final UserService userService;
 
-    public MainController(EventService eventService)
+    public MainController(EventService eventService, UserService userService)
     {
         this.eventService = eventService;
+        this.userService = userService;
     }
 
     @GetMapping
     public String mainPage(HttpServletRequest req)
     {
-        if (req.getSession().getAttribute("currentUser") == null)
+        if (req.getRemoteUser() == null || "".equals(req.getRemoteUser()))
             return "redirect:/welcome";
+        //
+        // RESOLVE DEPENDENCIES FOR USER IN SESSION IN /index - REMOVE FOLLOWING LINES AFTER
+        //
+        User current = userService.getByUsername(req.getRemoteUser());
+        User forSession =  new User(current.getFullName(), current.getUsername(), current.getEmail(), "");
+        forSession.setAdmin(current.getAdmin());
+        req.getSession().setAttribute("currentUser", forSession);
+        //
+        // STOP REMOVING
+        //
         return "index";
     }
 
@@ -64,7 +74,7 @@ public class MainController
                               @RequestParam String comment)
     {
         try {
-            eventService.addEvent((User) req.getSession().getAttribute("currentUser"),
+            eventService.addEvent(req.getRemoteUser(),
                     name,
                     Double.parseDouble(latitude),
                     Double.parseDouble(longitude),
@@ -89,7 +99,7 @@ public class MainController
     @GetMapping(path="/deleteEvent")
     @ResponseBody
     public String deleteEvent(HttpServletRequest req, @RequestParam Long id){
-        User currentUser = ((User)req.getSession().getAttribute("currentUser"));
+        User currentUser = userService.getByUsername(req.getRemoteUser());
         Event event;
         try {
             event = eventService.findById(id);
@@ -124,7 +134,7 @@ public class MainController
     public String likeOrDislike(HttpServletRequest req, @RequestParam Long id, @RequestParam String like)//like=1, dislike=0, removeVote=-1
     {
         try {
-            eventService.likeOrDislikeEvent(id, ((User) req.getSession().getAttribute("currentUser")).getUsername(), like);
+            eventService.likeOrDislikeEvent(id, req.getRemoteUser(), like);
             eventService.resetTTLById(id);
         }
         catch(EventDoesNotExistException ex){

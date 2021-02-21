@@ -101,7 +101,7 @@ public class UserService
 
     private User userToReturn(User user)
     {
-        User ret = new User(user.getFullName(), user.getUsername(), user.getEmail(), "");
+        User ret = new User(user.getFullName(), user.getUsername(), user.getEmail(), user.getPassword());
         ret.setAdmin(user.getAdmin());
         return ret;
     }
