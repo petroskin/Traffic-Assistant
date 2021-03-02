@@ -38,10 +38,10 @@ public class ReportService
         return reportRepository.getByDate(date);
     }
 
-    public Report addReport(String reportedUserUN, String userReportingUN, Date date, String comment)
+    public Report addReport(String reportedUserUN, String userReportingUN, Long eventId, Date date, String comment)
     {
         User reportedUser = userRepository.getByUsername(reportedUserUN);
         User userReporting = userRepository.getByUsername(userReportingUN);
-        return reportRepository.save(new Report(reportedUser, userReporting, comment, date));
+        return reportRepository.save(new Report(reportedUser, userReporting, eventId, comment, date));
     }
 }

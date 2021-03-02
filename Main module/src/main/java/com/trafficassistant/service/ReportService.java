@@ -53,10 +53,10 @@ public class ReportService
                 Report.class);
     }
 
-    public Report addReport(String reportedUserUN, String userReportingUN, Date date, String comment)
+    public Report addReport(String reportedUserUN, String userReportingUN, Long eventId, Date date, String comment)
     {
         User reportedUser = new User("", reportedUserUN, "", "");
         User userReporting = new User("", userReportingUN, "", "");
-        return addReport(new Report(reportedUser, userReporting, comment, date));
+        return addReport(new Report(reportedUser, userReporting, eventId, comment, date));
     }
 }

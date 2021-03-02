@@ -43,6 +43,7 @@ public class ReportController
         return reportService.addReport(
                 report.getReportedUser().getUsername(),
                 report.getUserReporting().getUsername(),
+                report.getEventId(),
                 report.getDate(),
                 report.getComment());
     }
