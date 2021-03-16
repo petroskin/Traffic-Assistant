@@ -4,9 +4,13 @@ import com.trafficassistant.model.Event;
 import com.trafficassistant.model.User;
 import com.trafficassistant.model.exceptions.EventDoesNotExistException;
 import com.trafficassistant.model.exceptions.EventNotOnRoadException;
+import com.trafficassistant.model.exceptions.NoBanPrivilegeException;
+import com.trafficassistant.service.BanService;
 import com.trafficassistant.service.EventService;
+import com.trafficassistant.service.ReportService;
 import com.trafficassistant.service.UserService;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,11 +25,14 @@ public class MainController
 {
     private final EventService eventService;
     private final UserService userService;
+    private final ReportService reportService;
+    private final BanService banService;
 
-    public MainController(EventService eventService, UserService userService)
-    {
+    public MainController(EventService eventService, UserService userService, ReportService reportService, BanService banService) {
         this.eventService = eventService;
         this.userService = userService;
+        this.reportService = reportService;
+        this.banService = banService;
     }
 
     @GetMapping
@@ -141,5 +148,34 @@ public class MainController
             return "Event was not found.";
         }
         return "success";
+    }
+
+    @GetMapping(path="/report/{eventId}")
+    public String reportUser(@PathVariable Long eventId, Model model) throws EventDoesNotExistException {
+        Event e = eventService.findById(eventId);
+        model.addAttribute("eventId", e.getId());
+        model.addAttribute("username", e.getUserName());
+        model.addAttribute("eventDetails", e.getTypeEnum().toString() + " event on " + e.getTime());
+        return "report";
+    }
+
+    @PostMapping(path="/report")
+    public String reportUserPost(@RequestParam Long eventId, @RequestParam String comment, HttpServletRequest req) throws EventDoesNotExistException {
+        Event e = eventService.findById(eventId);
+        reportService.addReport(e.getUserName(), req.getRemoteUser(), e.getId(), LocalDateTime.now(), comment);
+        return "redirect:/";
+    }
+
+    @GetMapping(path="/admin")
+    public String adminPage(Model model){
+        model.addAttribute("reportedUsers", reportService.getReports());
+        return "admin";
+    }
+
+    @GetMapping(path="/admin/ban/{username}")
+    public String banUser(@PathVariable String username, HttpServletRequest req) throws NoBanPrivilegeException {
+        banService.addBan(username, req.getRemoteUser(), LocalDateTime.now());
+        //remove report
+        return "redirect:/admin";
     }
 }

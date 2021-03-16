@@ -6,6 +6,7 @@ import com.trafficassistant.userservice.repository.ReportRepository;
 import com.trafficassistant.userservice.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -33,12 +34,12 @@ public class ReportService
         return reportRepository.getByReportedUser(user);
     }
 
-    public List<Report> getByDate(Date date)
+    public List<Report> getByDate(LocalDateTime date)
     {
         return reportRepository.getByDate(date);
     }
 
-    public Report addReport(String reportedUserUN, String userReportingUN, Long eventId, Date date, String comment)
+    public Report addReport(String reportedUserUN, String userReportingUN, Long eventId, LocalDateTime date, String comment)
     {
         User reportedUser = userRepository.getByUsername(reportedUserUN);
         User userReporting = userRepository.getByUsername(userReportingUN);

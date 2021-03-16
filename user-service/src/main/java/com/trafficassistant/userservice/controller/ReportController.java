@@ -4,6 +4,7 @@ import com.trafficassistant.userservice.model.Report;
 import com.trafficassistant.userservice.service.ReportService;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -32,7 +33,7 @@ public class ReportController
     }
 
     @PostMapping("get-by-date")
-    public List<Report> getByDate(@RequestBody Date date)
+    public List<Report> getByDate(@RequestBody LocalDateTime date)
     {
         return reportService.getByDate(date);
     }

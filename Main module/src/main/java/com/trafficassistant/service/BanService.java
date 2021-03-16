@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -39,7 +40,7 @@ public class BanService
         return ret;
     }
 
-    public Ban addBan(String bannedUserUN, String adminBanningUN, Date date) throws NoBanPrivilegeException
+    public Ban addBan(String bannedUserUN, String adminBanningUN, LocalDateTime date) throws NoBanPrivilegeException
     {
         User bannedUser = new User("", bannedUserUN, "", "");
         User adminBanning = new User("", adminBanningUN, "", "");

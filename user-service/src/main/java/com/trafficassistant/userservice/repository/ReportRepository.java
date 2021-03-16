@@ -5,6 +5,7 @@ import com.trafficassistant.userservice.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -12,5 +13,5 @@ import java.util.List;
 public interface ReportRepository extends JpaRepository<Report, Long>
 {
     List<Report> getByReportedUser(User user);
-    List<Report> getByDate(Date date);
+    List<Report> getByDate(LocalDateTime date);
 }

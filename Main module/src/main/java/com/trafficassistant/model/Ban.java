@@ -3,6 +3,7 @@ package com.trafficassistant.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -12,9 +13,9 @@ public class Ban
     Long Id;
     User bannedUser;
     User adminBanning;
-    Date date;
+    LocalDateTime date;
 
-    public Ban(User bannedUser, User adminBanning, Date date)
+    public Ban(User bannedUser, User adminBanning, LocalDateTime date)
     {
         this.bannedUser = bannedUser;
         this.adminBanning = adminBanning;

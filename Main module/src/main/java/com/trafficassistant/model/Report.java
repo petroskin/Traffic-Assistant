@@ -3,6 +3,7 @@ package com.trafficassistant.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -13,10 +14,10 @@ public class Report
     User reportedUser;
     User userReporting;
     String comment;
-    Date date;
+    LocalDateTime date;
     Long eventId;
 
-    public Report(User reportedUser, User userReporting, Long eventId, String comment, Date date)
+    public Report(User reportedUser, User userReporting, Long eventId, String comment, LocalDateTime date)
     {
         this.reportedUser = reportedUser;
         this.userReporting = userReporting;

@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -19,17 +21,17 @@ public class ReportService
 
     public List<Report> getReports()
     {
-        return Objects.requireNonNull(restTemplate.getForObject(
+        return Arrays.asList(Objects.requireNonNull(restTemplate.getForObject(
                 "http://USER-SERVICE/reports-rest/get-reports",
-                ReportList.class)).getReports();
+                Report[].class)));
     }
 
     public List<Report> getByReportedUser(String username)
     {
-        return Objects.requireNonNull(restTemplate.postForObject(
+        return Arrays.asList(Objects.requireNonNull(restTemplate.postForObject(
                 "http://USER-SERVICE/reports-rest/get-by-reported-user",
                 username,
-                ReportList.class)).getReports();
+                Report[].class)));
     }
 
     public List<Report> getByReportedUser(User user)
@@ -53,7 +55,7 @@ public class ReportService
                 Report.class);
     }
 
-    public Report addReport(String reportedUserUN, String userReportingUN, Long eventId, Date date, String comment)
+    public Report addReport(String reportedUserUN, String userReportingUN, Long eventId, LocalDateTime date, String comment)
     {
         User reportedUser = new User("", reportedUserUN, "", "");
         User userReporting = new User("", userReportingUN, "", "");

@@ -6,6 +6,7 @@ import com.trafficassistant.userservice.repository.BanRepository;
 import com.trafficassistant.userservice.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class BanService
         return banRepository.getByBannedUser(user);
     }
 
-    public Ban addBan(String bannedUserUN, String adminBanningUN, Date date)
+    public Ban addBan(String bannedUserUN, String adminBanningUN, LocalDateTime date)
     {
         User bannedUser = userRepository.getByUsername(bannedUserUN);
         User adminBanning = userRepository.getByUsername(adminBanningUN);

@@ -581,6 +581,7 @@
 <div id="eventDetailsDiv">
     <img src="images/1.png" id="eventTypeInDetails">
     <p id="dateReportedInDetails">Reported on: 03/12/2020 14:11</p>
+    <a id="reportUser">Report user</a>
     <p id="titleInDetails">Traffic Jam</p>
     <p id="commentInDetails">No comments provided</p>
     <p id="eventIDHiddenField"></p>
@@ -628,6 +629,7 @@
     var deleteEventButton = $("#deleteEvent");
     var likeButton = $('#likeButton');
     var dislikeButton = $('#dislikeButton');
+    var reportUserButton = $('#reportUser');
 
     function eventEnumTypeToInt(eventEnum) {
         switch (eventEnum) {
@@ -678,6 +680,7 @@
                         updateLikeDislikeMeter();
                         eventDetailsTitle.text(item.name);
                         eventDetailsComment.text(item.comment);
+                        reportUserButton.attr('href', 'report/' + item.id);
                         eventDetailsDate.text('Reported on: ' + item.time.replace('T', ' ').split('.')[0] + ' by ' + item.userName);
                         hiddenEventID.text(item.id);
                         eventDetailsImage.attr('src', 'images/' + eventEnumTypeToInt(item.typeEnum) + '.png');
@@ -703,6 +706,7 @@
                         updateLikeDislikeMeter();
                         eventDetailsTitle.text(item.name);
                         eventDetailsComment.text(item.comment);
+                        reportUserButton.attr('href', 'report/' + item.id);
                         eventDetailsDate.text('Reported on: ' + item.time.replace('T', ' ').split('.')[0] + ' by ' + item.userName);
                         hiddenEventID.text(item.id);
                         eventDetailsImage.attr('src', 'images/' + eventEnumTypeToInt(item.typeEnum) + '.png');

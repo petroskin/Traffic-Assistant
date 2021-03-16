@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+</head>
+<style>
+    body{
+        background-image: linear-gradient(#10084d, #08013e);
+        color: white;
+        background-attachment: fixed;
+    }
+    #reportComment{
+        font-size: 18px;
+        font-weight: 100;
+        border-radius: 20px;
+        border: 2px solid white;
+        width: 78%;
+        background: transparent;
+        color: white;
+        margin: 0 auto;
+        max-width: 500px;
+        max-height: 200px;
+    }
+    img{
+        height: 100px;
+        padding: 10px;
+    }
+    img:hover{
+        cursor: pointer;
+    }
+</style>
+<body>
+<div class="text-center">
+    <h1>Report User</h1>
+</div>
+<br/>
+<div class="text-center">
+    <h2>Details:</h2>
+</div>
+<br/>
+<div class="text-center">
+    <p id="eventId" style="visibility: hidden" th:text="${eventId}"></p>
+    <h2>Username</h2>
+    <h4 id="username" th:text="${username}">user</h4>
+    <h2>Event details</h2>
+    <h4 id="eventDetails" th:text="${eventDetails}">details</h4>
+    <h2>Your comment</h2>
+    <br/>
+    <div id="reportComment" contenteditable>(You can leave this empty)</div>
+    <br/>
+    <img id="backButton" src="images/cancelLocation.png">
+    <img id="confirmReportButton" src="images/confirmEvent.png">
+</div>
+</body>
+<script>
+    function post(path, params, method='post') {
+
+        // The rest of this code assumes you are not using a library.
+        // It can be made less verbose if you use one.
+        const form = document.createElement('form');
+        form.method = method;
+        form.action = path;
+
+        for (const key in params) {
+            if (params.hasOwnProperty(key)) {
+                const hiddenField = document.createElement('input');
+                hiddenField.type = 'hidden';
+                hiddenField.name = key;
+                hiddenField.value = params[key];
+
+                form.appendChild(hiddenField);
+            }
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+    var reportComment = $("#reportComment");
+    $("#backButton").click(function(){
+        window.location = "/";
+    });
+    reportComment.click(function(){
+        if(reportComment.text()==='(You can leave this empty)')
+            reportComment.text('');
+    });
+    $("#confirmReportButton").click(function(){
+        post('/report', {eventId: $("#eventId").text(), comment: reportComment.text()})
+    })
+</script>
+</html>
