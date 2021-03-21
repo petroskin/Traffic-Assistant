@@ -61,4 +61,17 @@ public class ReportService
         User userReporting = new User("", userReportingUN, "", "");
         return addReport(new Report(reportedUser, userReporting, eventId, comment, date));
     }
+
+    public Report removeReport(Long id)
+    {
+        return restTemplate.postForObject(
+                "http://USER-SERVICE/reports-rest/remove-report",
+                id,
+                Report.class);
+    }
+
+    public Report removeReport(Report report)
+    {
+        return removeReport(report.getId());
+    }
 }

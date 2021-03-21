@@ -5,6 +5,7 @@ import com.trafficassistant.userservice.model.User;
 import com.trafficassistant.userservice.repository.ReportRepository;
 import com.trafficassistant.userservice.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -44,5 +45,14 @@ public class ReportService
         User reportedUser = userRepository.getByUsername(reportedUserUN);
         User userReporting = userRepository.getByUsername(userReportingUN);
         return reportRepository.save(new Report(reportedUser, userReporting, eventId, comment, date));
+    }
+
+    @Transactional
+    public Report removeReport(Long id)
+    {
+        List<Report> reports = reportRepository.removeById(id);
+        if (reports == null || reports.isEmpty())
+            return null;
+        return reports.get(0);
     }
 }

@@ -14,4 +14,5 @@ public interface ReportRepository extends JpaRepository<Report, Long>
 {
     List<Report> getByReportedUser(User user);
     List<Report> getByDate(LocalDateTime date);
+    List<Report> removeById(Long Id);
 }

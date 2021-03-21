@@ -10,7 +10,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class Report
 {
-    Long Id;
+    Long id;
     User reportedUser;
     User userReporting;
     String comment;

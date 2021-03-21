@@ -48,4 +48,10 @@ public class ReportController
                 report.getDate(),
                 report.getComment());
     }
+
+    @PostMapping("remove-report")
+    public Report removeReport(@RequestBody Long id)
+    {
+        return reportService.removeReport(id);
+    }
 }

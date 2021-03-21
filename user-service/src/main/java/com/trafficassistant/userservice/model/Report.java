@@ -15,7 +15,7 @@ public class Report
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long Id;
+    Long id;
     @ManyToOne
     User reportedUser;
     @ManyToOne
