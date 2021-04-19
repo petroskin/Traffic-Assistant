@@ -1,58 +1,19 @@
 package com.trafficassistant.userservice.service;
 
 import com.trafficassistant.userservice.model.Report;
-import com.trafficassistant.userservice.model.User;
-import com.trafficassistant.userservice.repository.ReportRepository;
-import com.trafficassistant.userservice.repository.UserRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
-@Service
-public class ReportService
+public interface ReportService
 {
-    private final ReportRepository reportRepository;
-    private final UserRepository userRepository;
+    public List<Report> getReports();
 
-    public ReportService(ReportRepository reportRepository, UserRepository userRepository)
-    {
-        this.reportRepository = reportRepository;
-        this.userRepository = userRepository;
-    }
+    public List<Report> getByReportedUser(String username);
 
-    public List<Report> getReports()
-    {
-        return reportRepository.findAll();
-    }
+    public List<Report> getByDate(LocalDateTime date);
 
-    public List<Report> getByReportedUser(String username)
-    {
-        User user = userRepository.getByUsername(username);
-        return reportRepository.getByReportedUser(user);
-    }
+    public Report addReport(String reportedUserUN, String userReportingUN, Long eventId, LocalDateTime date, String comment);
 
-    public List<Report> getByDate(LocalDateTime date)
-    {
-        return reportRepository.getByDate(date);
-    }
-
-    public Report addReport(String reportedUserUN, String userReportingUN, Long eventId, LocalDateTime date, String comment)
-    {
-        User reportedUser = userRepository.getByUsername(reportedUserUN);
-        User userReporting = userRepository.getByUsername(userReportingUN);
-        return reportRepository.save(new Report(reportedUser, userReporting, eventId, comment, date));
-    }
-
-    @Transactional
-    public Report removeReport(Long id)
-    {
-        List<Report> reports = reportRepository.removeById(id);
-        if (reports == null || reports.isEmpty())
-            return null;
-        return reports.get(0);
-    }
+    public Report removeReport(Long id);
 }
