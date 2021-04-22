@@ -1,12 +1,15 @@
 package com.trafficassistant.service.impl;
 
+import com.trafficassistant.model.Ban;
 import com.trafficassistant.model.Event;
 import com.trafficassistant.model.RoadNode;
 import com.trafficassistant.model.enums.EventTypeEnum;
 import com.trafficassistant.model.exceptions.EventDoesNotExistException;
 import com.trafficassistant.model.exceptions.EventNotOnRoadException;
+import com.trafficassistant.model.exceptions.UserBannedException;
 import com.trafficassistant.repository.RoadRepository;
 import com.trafficassistant.repository.jpa.JpaEventRepository;
+import com.trafficassistant.service.BanService;
 import com.trafficassistant.service.EventService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,18 +27,23 @@ public class EventServiceImpl implements EventService
 
     private final JpaEventRepository eventRepository;
     private final Collection<RoadNode> inMemoryNodes;
+    private final BanService banService;
 
-    public EventServiceImpl(JpaEventRepository eventRepository, RoadRepository roadRepository) throws FileNotFoundException
+    public EventServiceImpl(JpaEventRepository eventRepository, RoadRepository roadRepository, BanService banService) throws FileNotFoundException
     {
         this.eventRepository = eventRepository;
         inMemoryNodes = roadRepository.getNodes();
+        this.banService = banService;
     }
 
     @Override
-    public void addEvent(String username, String name, Double latitude, Double longitude, int type, LocalDateTime time, String comment, Integer ttl) throws EventNotOnRoadException
+    public void addEvent(String username, String name, Double latitude, Double longitude, int type, LocalDateTime time, String comment, Integer ttl) throws EventNotOnRoadException, UserBannedException
     {
         if (!EventService.isOnRoad(latitude, longitude, inMemoryNodes))
-                throw new EventNotOnRoadException("Event " + name + " must be located on a roadway.");
+            throw new EventNotOnRoadException("Event " + name + " must be located on a roadway.");
+        Ban ban = banService.getByBannedUser(username).stream().filter(i -> i.getDate().isAfter(time)).max(Comparator.comparing(Ban::getDate)).orElse(null);
+        if (ban != null)
+            throw new UserBannedException(ban.getBannedUser().getUsername(), ban.getDate());
 
         EventTypeEnum typeEnum = EventTypeEnum.values()[type]; //type is 0 to 7 for now
         eventRepository.save(new Event(username, name, latitude, longitude, typeEnum, time, comment, ttl));

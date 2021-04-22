@@ -34,7 +34,7 @@ public class BanServiceImpl implements BanService
     {
         User bannedUser = userRepository.getByUsername(bannedUserUN);
         User adminBanning = userRepository.getByUsername(adminBanningUN);
-        if (!adminBanning.getAdmin())
+        if (!adminBanning.getAdmin() || bannedUser.getAdmin())
             return null;
         return banRepository.save(new Ban(bannedUser, adminBanning, date));
     }

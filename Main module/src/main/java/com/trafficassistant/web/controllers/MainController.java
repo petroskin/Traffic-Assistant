@@ -5,6 +5,7 @@ import com.trafficassistant.model.User;
 import com.trafficassistant.model.exceptions.EventDoesNotExistException;
 import com.trafficassistant.model.exceptions.EventNotOnRoadException;
 import com.trafficassistant.model.exceptions.NoBanPrivilegeException;
+import com.trafficassistant.model.exceptions.UserBannedException;
 import com.trafficassistant.service.BanService;
 import com.trafficassistant.service.EventService;
 import com.trafficassistant.service.ReportService;
@@ -90,7 +91,8 @@ public class MainController
                     comment,
                     30);
         }
-        catch(EventNotOnRoadException ex){
+        // catch UserBannedException automatically added, double check, then delete this comment :)
+        catch(EventNotOnRoadException | UserBannedException ex){
             return ex.getMessage();
         }
         return "success";

@@ -4,6 +4,7 @@ import com.trafficassistant.model.Event;
 import com.trafficassistant.model.RoadNode;
 import com.trafficassistant.model.exceptions.EventDoesNotExistException;
 import com.trafficassistant.model.exceptions.EventNotOnRoadException;
+import com.trafficassistant.model.exceptions.UserBannedException;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -11,7 +12,7 @@ import java.util.List;
 
 public interface EventService
 {
-    public void addEvent(String username, String name, Double latitude, Double longitude, int type, LocalDateTime time, String comment, Integer ttl) throws EventNotOnRoadException;
+    public void addEvent(String username, String name, Double latitude, Double longitude, int type, LocalDateTime time, String comment, Integer ttl) throws EventNotOnRoadException, UserBannedException;
 
     public List<Event> getEvents();
 
