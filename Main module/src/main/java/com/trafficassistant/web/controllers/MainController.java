@@ -26,14 +26,10 @@ public class MainController
 {
     private final EventService eventService;
     private final UserService userService;
-    private final ReportService reportService;
-    private final BanService banService;
 
     public MainController(EventService eventService, UserService userService, ReportService reportService, BanService banService) {
         this.eventService = eventService;
         this.userService = userService;
-        this.reportService = reportService;
-        this.banService = banService;
     }
 
     @GetMapping
@@ -41,16 +37,10 @@ public class MainController
     {
         if (req.getRemoteUser() == null || "".equals(req.getRemoteUser()))
             return "redirect:/welcome";
-        //
-        // RESOLVE DEPENDENCIES FOR USER IN SESSION IN /index - REMOVE FOLLOWING LINES AFTER
-        //
         User current = userService.getByUsername(req.getRemoteUser());
         User forSession =  new User(current.getFullName(), current.getUsername(), current.getEmail(), "");
         forSession.setAdmin(current.getAdmin());
         req.getSession().setAttribute("currentUser", forSession);
-        //
-        // STOP REMOVING
-        //
         return "index";
     }
 
@@ -91,7 +81,6 @@ public class MainController
                     comment,
                     30);
         }
-        // catch UserBannedException automatically added, double check, then delete this comment :)
         catch(EventNotOnRoadException | UserBannedException ex){
             return ex.getMessage();
         }
@@ -150,34 +139,5 @@ public class MainController
             return "Event was not found.";
         }
         return "success";
-    }
-
-    @GetMapping(path="/report/{eventId}")
-    public String reportUser(@PathVariable Long eventId, Model model) throws EventDoesNotExistException {
-        Event e = eventService.findById(eventId);
-        model.addAttribute("eventId", e.getId());
-        model.addAttribute("username", e.getUserName());
-        model.addAttribute("eventDetails", e.getTypeEnum().toString() + " event on " + e.getTime());
-        return "report";
-    }
-
-    @PostMapping(path="/report")
-    public String reportUserPost(@RequestParam Long eventId, @RequestParam String comment, HttpServletRequest req) throws EventDoesNotExistException {
-        Event e = eventService.findById(eventId);
-        reportService.addReport(e.getUserName(), req.getRemoteUser(), e.getId(), LocalDateTime.now(), comment);
-        return "redirect:/";
-    }
-
-    @GetMapping(path="/admin")
-    public String adminPage(Model model){
-        model.addAttribute("reportedUsers", reportService.getReports());
-        return "admin";
-    }
-
-    @GetMapping(path="/admin/ban/{username}")
-    public String banUser(@PathVariable String username, HttpServletRequest req) throws NoBanPrivilegeException {
-        banService.addBan(username, req.getRemoteUser(), LocalDateTime.now());
-        //remove report
-        return "redirect:/admin";
     }
 }

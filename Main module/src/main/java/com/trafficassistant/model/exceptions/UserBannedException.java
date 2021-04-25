@@ -1,11 +1,12 @@
 package com.trafficassistant.model.exceptions;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class UserBannedException extends Exception
 {
-    public UserBannedException(String user, LocalDateTime dateTime)
+    public UserBannedException(String message)
     {
-        super(user + " is banned until " + dateTime.toString() + "!");
+        super(message);
     }
 }

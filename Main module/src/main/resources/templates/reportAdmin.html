@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Report a user</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+</head>
+<style>
+    body{
+        background-image: linear-gradient(#10084d, #08013e);
+        color: white;
+        background-attachment: fixed;
+    }
+</style>
+<body>
+<div class="text-center">
+    <h1>Report Unavailable</h1>
+</div>
+<div class="text-center">
+    <h2>This event was created by an admin.</h2>
+    <br>
+    <br>
+    <h3 id="text"></h3>
+</div>
+</body>
+<script>
+    var time = 3;
+    setInterval(function(){
+        if(time === 0)
+            window.location.replace("/");
+        else
+            $("#text").text("Redirecting you back in " + time);
+        time--;
+    }, 1000);
+</script>
+</html>

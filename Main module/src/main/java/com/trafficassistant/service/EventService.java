@@ -16,6 +16,8 @@ public interface EventService
 
     public List<Event> getEvents();
 
+    public List<Event> getEventsWithIds(List<Long> ids);
+
     // Checks whether a point on the map is on top of a road node, as taken by osmfilter.
     public static boolean isOnRoad(Double lat, Double lon, Collection<RoadNode> nodes)
     {

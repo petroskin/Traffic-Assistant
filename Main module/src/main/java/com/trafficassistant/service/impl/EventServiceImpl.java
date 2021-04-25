@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
@@ -42,9 +43,12 @@ public class EventServiceImpl implements EventService
         if (!EventService.isOnRoad(latitude, longitude, inMemoryNodes))
             throw new EventNotOnRoadException("Event " + name + " must be located on a roadway.");
         Ban ban = banService.getByBannedUser(username).stream().filter(i -> i.getDate().isAfter(time)).max(Comparator.comparing(Ban::getDate)).orElse(null);
-        if (ban != null)
-            throw new UserBannedException(ban.getBannedUser().getUsername(), ban.getDate());
-
+        if (ban != null) {
+            Duration remaining = Duration.between(LocalDateTime.now(), ban.getDate());
+            long remainingHours = remaining.toHours()-24*remaining.toDays();
+            throw new UserBannedException("You have been banned! Time remaining: " + remaining.toDays() + " days and "
+                    + remainingHours + " hours.");
+        }
         EventTypeEnum typeEnum = EventTypeEnum.values()[type]; //type is 0 to 7 for now
         eventRepository.save(new Event(username, name, latitude, longitude, typeEnum, time, comment, ttl));
     }
@@ -53,6 +57,11 @@ public class EventServiceImpl implements EventService
     public List<Event> getEvents()
     {
         return eventRepository.findAll();
+    }
+
+    @Override
+    public List<Event> getEventsWithIds(List<Long> ids) {
+        return eventRepository.findAllById(ids);
     }
 
     @Override
